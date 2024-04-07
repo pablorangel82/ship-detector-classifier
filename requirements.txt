@@ -3,3 +3,5 @@ keras
 tensorflow
 pafy
 youtube_dl
+scikit-learn
+numpy
