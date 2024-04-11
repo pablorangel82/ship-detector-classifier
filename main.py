@@ -1,73 +1,80 @@
+import math
+
 import cv2
-import pafy
+import filters
+import samples
+from camera import Camera
+from detection_management import DetectionManagement
 
-thres = 0.42 # Threshold to detect object
-url = 'https://www.youtube.com/watch?v=tWUIUDd4DgE'
-pafy.backend="internal"
-video = pafy.new(url)
-best = video.getbest(preftype="mp4")
+thres = 0.42  # Threshold to detect object
+thres_detection = 0.6  # Threshold to detect a vessel
+thres_classifier = 0.6  # Threshold to classify a vessel
 
-#cap = cv2.VideoCapture(best.url)
-cap = cv2.VideoCapture('samples/test.mp4')
-cap.set(3,1280)
-cap.set(4,720)
-cap.set(10,70)
+filepath = samples.load_sample('militar')
+categories_filename = 'classifier/ship_types-ptbr'
 
-classNames= []
-classFile = 'classifier/ship_types'
-with open(classFile,'rt') as f:
-    classNames = f.read().rstrip('\n').split('\n')
+cap = cv2.VideoCapture(filepath)
+frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
-configClassifier = 'detector/detector.pbtxt'
-thres_detection = 0.6
-thres_classifier = 0.8
-classifier = 'classifier/model.pb'
 detector = 'detector/detector.pb'
+configDetector = 'detector/detector.pbtxt'
+classifier = 'classifier/model.pb'
 
-netClassifier = cv2.dnn.readNetFromTensorflow(classifier)
-netDetector = cv2.dnn_DetectionModel(detector,configClassifier)
-netDetector.setInputSize(224,224)
-netDetector.setInputScale(1.0/ 127.5)
+detection_management = DetectionManagement(thres_classifier, categories_filename)
+detection_management.start()
+
+netDetector = cv2.dnn_DetectionModel(detector, configDetector)
+# netDetector.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
+# netDetector.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA)
+netDetector.setInputSize(320, 320)
+netDetector.setInputScale(1.0 / 127.5)
 netDetector.setInputMean((127.5, 127.5, 127.5))
 netDetector.setInputSwapRB(True)
+netClassifier = cv2.dnn.readNetFromTensorflow(classifier)
+# netClassifier.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
+# netClassifier.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA)
 
 while True:
-    success,img = cap.read()
-    classIds, confs, bbox = netDetector.detect(img,confThreshold=thres)
+    success, img = cap.read()
+    img_to_show = img.copy()
+    classIds, confs, bbox = netDetector.detect(img_to_show, confThreshold=thres)
+
     if len(classIds) != 0:
-        for classId, confidence,box in zip(classIds.flatten(),confs.flatten(),bbox):
+
+        for classId, confidence, box in zip(classIds.flatten(), confs.flatten(), bbox):
 
             if classId == 9 and confidence > thres_detection:
+
                 x = box[0]
                 y = box[1]
                 w = box[2]
                 h = box[3]
 
-                name = 'Unknown'
-                max_value = 0
+                x = x - int(w * 0.2)
+                y = y - int(h * 0.2)
+                size_w = int(w * 1.5)
+                size_h = int(h * 1.5)
 
-                vessel_img = img[y:y+h, x:x+w]
-                vessel_img = cv2.resize(vessel_img, (224, 224))
-                new_img = cv2.normalize(vessel_img, None, 0, 1.0, cv2.NORM_MINMAX, dtype=cv2.CV_32F)
-                netClassifier.setInput(cv2.dnn.blobFromImage(new_img, size=(224, 224), swapRB=True, crop=False))
+                if x < 0:
+                    x = 0
+                if y < 0:
+                    y = 0
+
+                vessel_img = img[y:y + size_h, x:x + size_w]
+                vessel_img, w, h = filters.transform(vessel_img, size_w, size_h)
+                new_img = cv2.normalize(vessel_img, None, 0, 0.2, cv2.NORM_MINMAX, dtype=cv2.CV_32F)
+                # cv2.imshow('Ship Detector', vessel_img)
+                netClassifier.setInput(cv2.dnn.blobFromImage(new_img, size=(filters.crop_max, filters.crop_max), swapRB=True, crop=False))
                 preds = netClassifier.forward()
-                max_index = 0
-                max_value = preds[0][0]
-                for i in range(len(preds[0])):
-                    if max_value < preds[0][i]:
-                        max_index = i
-                        max_value = preds[0][i]
-                if max_value < thres_classifier:
-                    name = 'Unknown'
-                else:
-                    name = classNames[max_index]
-                cv2.rectangle(img, box, color=(0, 255, 0), thickness=2)
-                cv2.putText(img,name.upper(),(box[0]+10,box[1]+30),
-                            cv2.FONT_HERSHEY_COMPLEX,1,(0,255,0),2)
-                cv2.putText(img,str(round(max_value*100,2)),(box[0]+200,box[1]+30),
-                            cv2.FONT_HERSHEY_COMPLEX,1,(0,255,0),2)
 
-    cv2.imshow('Ship Detector', cv2.resize(img, (1280,720)))
+                track = detection_management.update_track(preds, [x, y, size_w, size_h])
+
+                cv2.rectangle(img_to_show, track.bbox, color=(0, 0, 255), thickness=1)
+                name = track.uuid[len(track.uuid)-3]+ track.uuid[len(track.uuid)-2]+ track.uuid[len(track.uuid)-1]
+                cv2.putText(img_to_show, track.category.upper() + '(' + str(round(track.confidence * 100)) + ') - ' + name, (x - 10, y - 10),
+                            cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 0), 1)
+    cv2.imshow('Ship Detector', img_to_show)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 cv2.destroyAllWindows()

@@ -1,5 +1,6 @@
 opencv-python
 keras
 tensorflow
-pafy
-youtube_dl
+numpy
+scikit-learn
+utm
