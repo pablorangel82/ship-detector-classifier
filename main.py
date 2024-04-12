@@ -9,8 +9,9 @@ from detection_management import DetectionManagement
 thres = 0.42  # Threshold to detect object
 thres_detection = 0.6  # Threshold to detect a vessel
 thres_classifier = 0.6  # Threshold to classify a vessel
+monitor_resolution = (800, 600)
 
-filepath = samples.load_sample('militar')
+filepath = samples.load_sample('validacao2')
 categories_filename = 'classifier/ship_types-ptbr'
 
 cap = cv2.VideoCapture(filepath)
@@ -41,20 +42,17 @@ while True:
     classIds, confs, bbox = netDetector.detect(img_to_show, confThreshold=thres)
 
     if len(classIds) != 0:
-
         for classId, confidence, box in zip(classIds.flatten(), confs.flatten(), bbox):
-
             if classId == 9 and confidence > thres_detection:
-
                 x = box[0]
                 y = box[1]
                 w = box[2]
                 h = box[3]
 
-                x = x - int(w * 0.2)
-                y = y - int(h * 0.2)
-                size_w = int(w * 1.5)
-                size_h = int(h * 1.5)
+                x = x - int(w * 0.1)
+                y = y - int(h * 0.1)
+                size_w = int(w * 1.2)
+                size_h = int(h * 1.2)
 
                 if x < 0:
                     x = 0
@@ -67,14 +65,14 @@ while True:
                 # cv2.imshow('Ship Detector', vessel_img)
                 netClassifier.setInput(cv2.dnn.blobFromImage(new_img, size=(filters.crop_max, filters.crop_max), swapRB=True, crop=False))
                 preds = netClassifier.forward()
-
                 track = detection_management.update_track(preds, [x, y, size_w, size_h])
+    for track in detection_management.tracks_list:
+        cv2.rectangle(img_to_show, track.bbox, color=(0, 0, 255), thickness=2)
+        cv2.putText(img_to_show, track.get_description(),
+                    (track.bbox[0] - 10, track.bbox[1] - 10),
+                    cv2.FONT_HERSHEY_COMPLEX, 1, (0, 0, 0), 1)
 
-                cv2.rectangle(img_to_show, track.bbox, color=(0, 0, 255), thickness=1)
-                name = track.uuid[len(track.uuid)-3]+ track.uuid[len(track.uuid)-2]+ track.uuid[len(track.uuid)-1]
-                cv2.putText(img_to_show, track.category.upper() + '(' + str(round(track.confidence * 100)) + ') - ' + name, (x - 10, y - 10),
-                            cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 0), 1)
-    cv2.imshow('Ship Detector', img_to_show)
+    cv2.imshow('Ship Detector', cv2.resize(img_to_show, monitor_resolution))
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 cv2.destroyAllWindows()

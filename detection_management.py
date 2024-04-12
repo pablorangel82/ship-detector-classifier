@@ -1,8 +1,6 @@
-import math
 from datetime import datetime
 import time
 from threading import Thread
-
 from track import Track
 
 
@@ -40,12 +38,15 @@ class DetectionManagement(Thread):
                     max_index = 5
                     max_value = 1
                 track.update(max_value, self.categories, max_index, bbox)
-
                 return track
+        if max_value > self.threshold_classifier:
+            track = Track(max_value, self.categories, max_index, bbox)
+            # print('criando novo: ' + track.uuid)
+            self.tracks_list.append(track)
+            return track
 
-        track = Track(None, None, None, None, category, bbox, max_value)
-        self.tracks_list.append(track)
-        return track
+        return None
+
 
     def run(self):
         while True:
@@ -55,4 +56,4 @@ class DetectionManagement(Thread):
                 if diff.seconds > 2:
                     self.tracks_list.remove(track)
                     # print("Removed track:"+track.uuid)
-            time.sleep(1)
+            time.sleep(2)
