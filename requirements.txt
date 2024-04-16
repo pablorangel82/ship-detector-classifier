@@ -3,5 +3,6 @@ keras
 tensorflow
 numpy
 scikit-learn
-utm
 pyproj
+pillow
+filterpy

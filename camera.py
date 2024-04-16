@@ -1,7 +1,9 @@
 import csv
-import math
-import utm
+import json
+
 import pyproj as proj
+
+from calibration import Calibration
 
 
 class Camera:
@@ -17,39 +19,22 @@ class Camera:
     pan_min = 0
     pan_max = 0
     capture_rate = 0
-    calibration_pixel_height = 0
-    calibration_real_height = 0
-    calibration_real_distance = 0
     focal_length = 0
-    bearing = 45
+    bearing = 6
 
-    def __init__(self, location):
+    def __init__(self, location, calibration):
         self.load_config(location)
-        self.focal_length = (self.calibration_pixel_width * self.calibration_real_distance) / self.calibration_real_height
+        self.focal_length = (calibration.pixel_height * calibration.real_distance) / calibration.real_height
 
-    def load_config(self, location):
-        with (open('cameras/'+location+'.csv', 'r') as csvfile):
-            config = csv.reader(csvfile, delimiter=',')
-            next(config)  # skipping header
-            for row in config:
-                self.address = row[0]
-                self.lat = float(row[1])
-                self.lon = float(row[2])
-                self.ref_bearing = float(row[3])
-                self.zoom_min = float(row[4])
-                self.zoom_max = float(row [5])
-                self.tilt_min = float(row[6])
-                self.tilt_max = float(row[7])
-                self.pan_min = float(row[8])
-                self.pan_max = float(row[9])
-                self.capture_rate = float(row[10])
-                self.calibration_pixel_width = float(row[11])
-                self.calibration_real_height = float(row[12])
-                self.calibration_real_distance = float(row[13])
-
-    def get_xy_coordinate(self):
-        if self.lat is None or self.lon is None:
-            return None, None
-        p = proj.Proj(proj='utm', zone=23, ellps='WGS84', preserve_units=False)
-        x, y = p(self.lon, self.lat)
-        return [x, y]
+    def load_config(self, camera_data):
+        self.address = camera_data['address']
+        self.lat = camera_data['latitude']
+        self.lon = camera_data['longitude']
+        self.ref_bearing = camera_data['standard_bearing']
+        self.zoom_min = camera_data['zoom_min']
+        self.zoom_max = camera_data['zoom_max']
+        self.tilt_min = camera_data['tilt_min']
+        self.tilt_max = camera_data['tilt_max']
+        self.pan_min = camera_data['pan_min']
+        self.pan_max = camera_data['pan_max']
+        self.capture_rate = camera_data['capture_rate']
