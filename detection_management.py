@@ -2,7 +2,6 @@ import json
 from datetime import datetime
 import time
 from threading import Thread, Semaphore
-import kinematic
 import samples
 from calibration import Calibration
 from camera import Camera
@@ -96,8 +95,7 @@ class DetectionManagement(Thread):
 
             vessel_img = raw_img[y:y + size_h, x:x + size_w]
             vessel_img, w, h = filters.transform(vessel_img, size_w, size_h)
-            new_img = cv2.normalize(vessel_img, None, self.calibration.alpha, self.calibration.beta, cv2.NORM_MINMAX,
-                                    dtype=cv2.CV_32F)
+            new_img = cv2.normalize(vessel_img, None, self.calibration.alpha, self.calibration.beta, cv2.NORM_MINMAX,dtype=cv2.CV_32F)
             # cv2.imshow('Ship Detector', vessel_img)
             self.net_classifier.setInput(
                 cv2.dnn.blobFromImage(new_img, size=(filters.crop_max, filters.crop_max), swapRB=True, crop=False))
