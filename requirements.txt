@@ -1,5 +1,8 @@
 opencv-python
 keras
 tensorflow
-pafy
-youtube_dl
+numpy
+scikit-learn
+pyproj
+pillow
+filterpy
