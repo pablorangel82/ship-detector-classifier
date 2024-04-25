@@ -20,7 +20,7 @@ class Kinematic():
     timestamp = 0
     delta_t = 0
 
-    def __init__(self):
+    def __init__(self, frame_rate):
         self.geo_positions = GenericList(NUMBER_OF_SAMPLES)
         self.pixel_positions = GenericList(NUMBER_OF_SAMPLES)
         self.velocities = GenericList(NUMBER_OF_SAMPLES)
@@ -109,7 +109,7 @@ class Kinematic():
         vy = self.kf.x[1]
         return vx, vy
 
-    def update(self, bbox, frame_width, frame_height, camera, calibration):
+    def update(self, bbox, frame_width, frame_height, camera, calibration, real_height):
         timestamp_now = datetime.now()
         bbox_added = False
         if self.pixel_positions.get_current_value() is None:
@@ -118,7 +118,7 @@ class Kinematic():
         time_elapsed = Kinematic.delta_time(self.timestamp, timestamp_now)
         if time_elapsed > self.delta_t:
             distance = calibration.zoom * (
-                        (calibration.real_height * camera.focal_length) / self.get_pixel_coordinates()[3])
+                        (real_height * camera.focal_length) / self.get_pixel_coordinates()[3])
             distance = (distance / 1000)  # mm to m
             new_center_pixel_x = bbox[0] + int(bbox[2] / 2)
             bearing_pixel, distance_pixel = Kinematic.xy_to_polar(0, 0, new_center_pixel_x - (frame_width/2), frame_height)

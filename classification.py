@@ -31,4 +31,4 @@ class Classification():
         self.timestamp = datetime.now()
 
     def to_string(self):
-        return self.category.upper() + ' (' + str(round(self.classification_confidence * 100)) + ')'
+        return (self.category.description).upper() + ' (' + str(round(self.classification_confidence * 100)) + ')'

@@ -1,3 +1,5 @@
+from category import Category
+
 CUDA_SUPPORT = False
 
 import json
@@ -23,6 +25,7 @@ class DetectionManagement(Thread):
     camera = None
     tracks_list = {}
     categories_names = []
+    categories = {}
     pixel_inc_width = 80
     pixel_inc_height = 80
     net_detector = None
@@ -44,6 +47,9 @@ class DetectionManagement(Thread):
         calibration_data = config_data['calibration']
         self.calibration = Calibration(calibration_data)
         self.camera = Camera(camera_data, self.calibration)
+        if sample is None:
+            self.frame_width = self.camera.resolution_width
+            self.frame_height = self.camera.resolution_height
         self.load_categories(language)
         self.net_detector = cv2.dnn_DetectionModel(detector_model, detector_config)
         if CUDA_SUPPORT:
@@ -61,14 +67,42 @@ class DetectionManagement(Thread):
             print('Number of GPUs: ' + str(count))
 
     def load_categories(self, language):
-        categories_filename = 'classifier/ship_types-' + language
-        with open(categories_filename, 'rt') as f:
-            self.categories_names = f.read().rstrip('\n').split('\n')
+        json_file = open('classifier/ship_types_'+language+'.json')
+        config_data = json.load(json_file)
+
+        data = config_data['cargo']
+        category = Category(data['id'], data['description'], data['avg_height'])
+        self.categories[category.id] = category
+
+        data = config_data['military']
+        category = Category(data['id'], data['description'], data['avg_height'])
+        self.categories[category.id] = category
+
+        data = config_data['carrier']
+        category = Category(data['id'], data['description'], data['avg_height'])
+        self.categories[category.id] = category
+
+        data = config_data['cruise']
+        category = Category(data['id'], data['description'], data['avg_height'])
+        self.categories[category.id] = category
+
+        data = config_data['tanker']
+        category = Category(data['id'], data['description'], data['avg_height'])
+        self.categories[category.id] = category
+
+        data = config_data['unknown']
+        category = Category(data['id'], data['description'], data['avg_height'])
+        self.categories[category.id] = category
 
     def detect_estimate_and_classify(self):
-        if self.cap is not None:
-            success, raw_img = self.cap.read()
-            img_for_detection = cv2.convertScaleAbs(raw_img, alpha=self.calibration.alpha, beta=self.calibration.beta)
+        raw_img = None
+        if self.cap is None:
+            raw_img = self.camera.video_stream.read()
+            # print(raw_img)
+        else:
+            sucess,raw_img = self.cap.read()
+        if raw_img is not None:
+            # img_for_detection = cv2.convertScaleAbs(raw_img, alpha=self.calibration.alpha, beta=self.calibration.beta)
             detections = self.detect(raw_img)
             self.classify(raw_img, detections)
             return raw_img, self.tracks_list
@@ -140,10 +174,11 @@ class DetectionManagement(Thread):
                 max_value = 1
 
             if track_existent is None:
-                track_existent = Track()
+                track_existent = Track(1/self.camera.capture_rate)
 
-            track_existent.kinematic.update(detected_bbox, self.frame_width, self.frame_height, self.camera, self.calibration)
-            track_existent.classification.update(detection_confidence, max_value, self.categories_names, max_index)
+            track_existent.classification.update(detection_confidence, max_value, self.categories, max_index)
+            track_existent.kinematic.update(detected_bbox, self.frame_width, self.frame_height, self.camera, self.calibration, track_existent.classification.category.avg_height)
+
             track_existent.kinematic.current_bbox = detected_bbox
             self.tracks_list[track_existent.uuid] = track_existent
         return track_existent
@@ -160,6 +195,6 @@ class DetectionManagement(Thread):
 
             with self.control_access_track_list:
                 for track in tracks_to_remove:
-                    print("Removed track:" + track.uuid)
+                    # print("Removed track:" + track.uuid)
                     del self.tracks_list[track.uuid]
             time.sleep(2)

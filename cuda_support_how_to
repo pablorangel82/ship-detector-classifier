@@ -1,0 +1,6 @@
+For CUDA support (Windows 10 PRO):
+
+- Install CUDA Development Kit 12.0.0
+- Install CUDNN 8.9
+- Install libs described in requirements.txt. OpenCV must be 4.9.0.80
+- Install opencv-contrib from pre-built file

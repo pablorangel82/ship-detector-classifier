@@ -12,7 +12,7 @@ class Viewer():
     font_color = (0, 0, 0)
     rectangle_color = (0, 0, 0)
     rectangle_thickness = 2
-    depth_limit = 2000
+    depth_limit = 2500
 
     def build_label(self, image, text, location):
         label = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -30,7 +30,7 @@ class Viewer():
     def show_image(self, img_to_show, tracks_list, semaphore):
         with semaphore:
             for track in tracks_list.values():
-                if track.kinematic.distance_from_camera is not None:
+                if track.kinematic.distance_from_camera and self.depth_limit is not None:
                     if track.kinematic.distance_from_camera  > self.depth_limit:
                         continue
                 lat, lon, speed, course, bbox = track.kinematic.get_current_kinematic()

@@ -4,7 +4,8 @@ from viewer import Viewer
 detector_model = 'detector/detector.pb'
 detector_config = 'detector/detector.pbtxt'
 classifier_model = 'classifier/model.pb'
-sample = 'barca'
+# sample = 'barca'
+sample = None
 detection_management = DetectionManagement(detector_model,detector_config,classifier_model,'en', 'ptbr', sample)
 detection_management.start()
 viewer = Viewer()

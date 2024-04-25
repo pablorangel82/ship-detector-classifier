@@ -1,3 +1,5 @@
+from imutils.video import VideoStream
+
 class Camera:
     address = ''
     lat = 0
@@ -13,10 +15,14 @@ class Camera:
     capture_rate = 0
     focal_length = 0
     bearing = 6
+    video_stream = None
+    resolution_width = 0
+    resolution_height = 0
 
     def __init__(self, location, calibration):
         self.load_config(location)
         self.focal_length = (calibration.pixel_height * calibration.real_distance) / calibration.real_height
+        self.video_stream = VideoStream(self.address).start()
 
     def load_config(self, camera_data):
         self.address = camera_data['address']
@@ -30,3 +36,5 @@ class Camera:
         self.pan_min = camera_data['pan_min']
         self.pan_max = camera_data['pan_max']
         self.capture_rate = camera_data['capture_rate']
+        self.resolution_width = camera_data['resolution_width']
+        self.resolution_height = camera_data['resolution_height']

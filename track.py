@@ -10,9 +10,9 @@ class Track:
     kinematic = None
     classification = None
 
-    def __init__(self):
+    def __init__(self, frame_rate):
         self.uuid = 'UUID-EN-CAMERA-' + str(uuid.uuid4())
-        self.kinematic = kinematic.Kinematic()
+        self.kinematic = kinematic.Kinematic(frame_rate)
         self.classification = classification.Classification()
 
     def to_string(self):
