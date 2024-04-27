@@ -4,32 +4,22 @@ from pyproj import proj
 from filterpy.kalman import KalmanFilter
 import numpy as np
 from filterpy.common import Q_discrete_white_noise
-
 from GenericList import GenericList
 
-NUMBER_OF_SAMPLES = 1
 
+class Kinematic:
+    NUMBER_OF_SAMPLES = 1
+    Q = None
 
-class Kinematic():
-    geo_positions = None
-    pixel_positions = None
-    velocities = None
-    kf = None
-    distance_from_camera = 0
-    bearing = 0
-    timestamp = 0
-    delta_t = 0
-
-    def __init__(self, frame_rate):
-        self.geo_positions = GenericList(NUMBER_OF_SAMPLES)
-        self.pixel_positions = GenericList(NUMBER_OF_SAMPLES)
-        self.velocities = GenericList(NUMBER_OF_SAMPLES)
+    def __init__(self):
+        self.geo_positions = GenericList(Kinematic.NUMBER_OF_SAMPLES)
+        self.pixel_positions = GenericList(Kinematic.NUMBER_OF_SAMPLES)
+        self.velocities = GenericList(Kinematic.NUMBER_OF_SAMPLES)
         self.kf = self.init_kalman_filter()
-        self.kf_vy = self.init_kalman_filter()
         self.timestamp = datetime.now()
         self.distance_from_camera = None
         self.bearing = None
-        self.delta_t = 0
+        self.delta_t = -1
 
     def init_kalman_filter(self):
         kf = KalmanFilter(dim_x=2, dim_z=1)
@@ -38,8 +28,8 @@ class Kinematic():
         kf.F = np.array([[1., 1.], [0., 1.]])
         kf.H = np.array([[1., 0.]])
         kf.P *= 1000.
-        kf.R = .8
-        kf.Q = Q_discrete_white_noise(dim=2, dt=1/60, var=0.13)
+        kf.R = 5
+        kf.Q = Kinematic.Q
         return kf
 
     @staticmethod
@@ -47,8 +37,8 @@ class Kinematic():
         x = math.sin(math.radians(bearing)) * distance
         y = math.cos(math.radians(bearing)) * distance
         if ref_x and ref_y is not None:
-            x += x + ref_x
-            y += y + ref_y
+            x = x + ref_x
+            y = y + ref_y
         return x, y
 
     @staticmethod
@@ -110,6 +100,7 @@ class Kinematic():
         return vx, vy
 
     def update(self, bbox, frame_width, frame_height, camera, calibration, real_height):
+        self.kf.Q = Kinematic.Q
         timestamp_now = datetime.now()
         bbox_added = False
         if self.pixel_positions.get_current_value() is None:
@@ -117,11 +108,11 @@ class Kinematic():
             bbox_added = True
         time_elapsed = Kinematic.delta_time(self.timestamp, timestamp_now)
         if time_elapsed > self.delta_t:
-            distance = calibration.zoom * (
-                        (real_height * camera.focal_length) / self.get_pixel_coordinates()[3])
+            distance = (real_height * camera.focal_length) / self.get_pixel_coordinates()[3]
             distance = (distance / 1000)  # mm to m
             new_center_pixel_x = bbox[0] + int(bbox[2] / 2)
-            bearing_pixel, distance_pixel = Kinematic.xy_to_polar(0, 0, new_center_pixel_x - (frame_width/2), frame_height)
+            bearing_pixel, distance_pixel = Kinematic.xy_to_polar(0, 0, new_center_pixel_x - (frame_width / 2),
+                                                                  frame_height)
             new_bearing = camera.bearing + bearing_pixel
             if new_bearing > 360:
                 new_bearing = 360 - new_bearing
@@ -136,7 +127,7 @@ class Kinematic():
             #     old_position_x = old_position[0]
             #     old_position_y = old_position[1]
             new_position_lat, new_position_lon = Kinematic.polar_to_geo(camera.lat, camera.lon, self.bearing,
-                                                                    self.distance_from_camera)
+                                                                        self.distance_from_camera)
             new_position_x, new_position_y = Kinematic.geo_to_xy(new_position_lat, new_position_lon)
             vx, vy = self.apply_kalman_filter(new_position_x, new_position_y)
             self.velocities.add_value([vx * 1.94384, vy * 1.94384])
@@ -167,11 +158,13 @@ class Kinematic():
         return lat, lon, speed, course, bbox
 
     def to_string(self):
-        string = 'self.get_description()'
+        string = ''
         lat, lon, speed, course, bbox = self.get_current_kinematic()
-        if lat or lon or speed or course is None:
-            return str(bbox)
         string = string + '\nPOS: ' + str(lat) + ', ' + str(lon)
         string = string + '\nSPD: ' + str(speed)
         string = string + '\nCOG: ' + str(course)
         return string
+
+    @staticmethod
+    def update_noise_function(frame_rate):
+        Kinematic.Q = Q_discrete_white_noise(dim=2, dt=1 / frame_rate, var=0.005)

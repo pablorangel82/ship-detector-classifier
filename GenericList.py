@@ -1,7 +1,4 @@
-class GenericList():
-    index = -1
-    length = 0
-
+class GenericList:
     def __init__(self, length):
         self.length = length
         self.values = {}

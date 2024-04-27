@@ -4,16 +4,11 @@ import kinematic
 
 
 class Track:
-    NUMBER_OF_SAMPLES = 2
-    uuid = ''
-    name = None
-    kinematic = None
-    classification = None
-
-    def __init__(self, frame_rate):
+    def __init__(self):
         self.uuid = 'UUID-EN-CAMERA-' + str(uuid.uuid4())
-        self.kinematic = kinematic.Kinematic(frame_rate)
+        self.kinematic = kinematic.Kinematic()
         self.classification = classification.Classification()
+        self.name = ''
 
     def to_string(self):
         string = '\nId: ' + self.get_name() + '\n Classification: ' + self.classification.to_string() + '\n Kinematic: ' + self.kinematic.to_string()

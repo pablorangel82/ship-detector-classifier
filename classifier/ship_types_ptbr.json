@@ -2,7 +2,7 @@
     "cargo":{
         "id" : 0,
         "description" : "Cargueiro de Proposito Geral",
-        "avg_height" : 35000
+        "avg_height" : 5500
     },
     "military":{
         "id": 1,
@@ -12,21 +12,21 @@
     "carrier":{
         "id": 2,
         "description": "Transporte de Pessoas ou Cargas",
-        "avg_height": 74000
+        "avg_height": 5500
     },
     "cruise":{
         "id": 3,
         "description": "Transporte de Pessoas",
-        "avg_height": 35000
+        "avg_height": 5500
     },
     "tanker":{
         "id": 4,
         "description": "Navio Tanque",
-        "avg_height": 40000
+        "avg_height": 5500
     },
     "unknown":{
         "id": 5,
         "description": "Desconhecido",
-        "avg_height": 35000
+        "avg_height": 5500
     }
 }

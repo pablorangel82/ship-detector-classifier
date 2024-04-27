@@ -24,7 +24,7 @@ print(frozen_func.outputs)
 
 tf.io.write_graph(graph_or_graph_def=frozen_func.graph,
                   logdir="/home/pablo/Downloads/model",
-                  name="model.pb",
+                  name="classifier.pb",
                   as_text=False)
 
 

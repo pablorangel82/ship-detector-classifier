@@ -1,13 +1,5 @@
 class Calibration:
-    pixel_height = 0
-    real_height = 0
-    real_distance = 0
-    threshold_detection = 0
-    threshold_detection_vessel = 0
-    threshold_classification_vessel = 0
-    alpha = 0
-    beta = 0
-    zoom = 0
+
     def __init__(self, calibration_data):
         self.pixel_height = calibration_data['pixel_height']
         self.real_height = calibration_data ['real_height']

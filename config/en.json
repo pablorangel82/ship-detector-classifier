@@ -10,7 +10,7 @@
         "tilt_max": 90,
         "pan_min": -90,
         "pan_max": 90,
-        "capture_rate": 30,
+        "frame_rate": 60,
         "resolution_width": 1920,
         "resolution_height": 1080
     },
@@ -23,6 +23,6 @@
         "threshold_detection" : 0.42,
         "threshold_detection_vessel" : 0.68,
         "threshold_classification_vessel" : 0.6,
-        "zoom": 0.4
+        "zoom": 1
     }
 }

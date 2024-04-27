@@ -1,0 +1,28 @@
+{
+    "camera" : {
+        "address": "rtsp://192.168.68.55/barca.mp4",
+        "latitude": -22.912759833,
+        "longitude": -43.1582615,
+        "standard_bearing": 336,
+        "zoom_min": 4.3,
+        "zoom_max": 129,
+        "tilt_min": -90,
+        "tilt_max": 90,
+        "pan_min": -90,
+        "pan_max": 90,
+        "frame_rate": 60,
+        "resolution_width": 1920,
+        "resolution_height": 1080
+    },
+    "calibration" : {
+        "pixel_height" : 136,
+        "real_height" : 5500,
+        "real_distance" : 1370000,
+        "alpha" : 0,
+        "beta" : 0.2,
+        "threshold_detection" : 0.42,
+        "threshold_detection_vessel" : 0.6,
+        "threshold_classification_vessel" : 0.6,
+        "zoom": 1.8
+    }
+}

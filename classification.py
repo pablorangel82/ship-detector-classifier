@@ -1,12 +1,7 @@
 from datetime import datetime
 
-class Classification():
-    category = ''
-    category_index = 5
-    timestamp = 0
-    classification_confidence = 0
-    detection_confidence = 0
-    votes = [0, 0, 0, 0, 0, 0]
+
+class Classification:
 
     def __init__(self):
         self.category = ''

@@ -5,14 +5,14 @@ import cv2
 import detection_management
 
 
-class Viewer():
-    monitor_resolution = (1920, 1080)
+class Viewer:
+    monitor_resolution = (800, 600)
     font = None
     font_thickness = 2
     font_color = (0, 0, 0)
     rectangle_color = (0, 0, 0)
     rectangle_thickness = 2
-    depth_limit = 2500
+    depth_limit = None
 
     def build_label(self, image, text, location):
         label = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -30,9 +30,11 @@ class Viewer():
     def show_image(self, img_to_show, tracks_list, semaphore):
         with semaphore:
             for track in tracks_list.values():
-                if track.kinematic.distance_from_camera and self.depth_limit is not None:
-                    if track.kinematic.distance_from_camera  > self.depth_limit:
-                        continue
+                if self.depth_limit is not None:
+                    if track.kinematic.distance_from_camera is not None:
+                        if track.kinematic.distance_from_camera  > self.depth_limit:
+                            continue
+                # print(track.to_string())
                 lat, lon, speed, course, bbox = track.kinematic.get_current_kinematic()
                 cv2.rectangle(img_to_show, bbox, color=self.rectangle_color, thickness=self.rectangle_thickness)
                 name_classification = track.get_name() + ' - ' + track.classification.to_string()

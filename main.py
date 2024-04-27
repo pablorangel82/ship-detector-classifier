@@ -3,10 +3,8 @@ from viewer import Viewer
 
 detector_model = 'detector/detector.pb'
 detector_config = 'detector/detector.pbtxt'
-classifier_model = 'classifier/model.pb'
-# sample = 'barca'
-sample = None
-detection_management = DetectionManagement(detector_model,detector_config,classifier_model,'en', 'ptbr', sample)
+classifier_model = 'classifier/classifier.pb'
+detection_management = DetectionManagement(detector_model,detector_config,classifier_model,'rstp_example', 'ptbr')
 detection_management.start()
 viewer = Viewer()
 

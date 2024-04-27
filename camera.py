@@ -1,29 +1,35 @@
 from imutils.video import VideoStream
+import datetime
+
+import kinematic
+
 
 class Camera:
-    address = ''
-    lat = 0
-    lon = 0
-    ref_bearing = 0
-    ptz = [0, 0, 0]
-    zoom_min = 0
-    zoom_max = 0
-    tilt_min = 0
-    tilt_max = 0
-    pan_min = 0
-    pan_max = 0
-    capture_rate = 0
-    focal_length = 0
-    bearing = 6
-    video_stream = None
-    resolution_width = 0
-    resolution_height = 0
 
-    def __init__(self, location, calibration):
+    def __init__(self, location, calibration, estimate_frame_rate):
+        self.estimation_interval = 10
+        self.estimate_frame_rate = estimate_frame_rate
+        self.time_of_first_read = datetime.datetime.now()
+        self.frames_read = 0
+        self.address = None
+        self.lat = None
+        self.lon = None
+        self.ref_bearing = None
+        self.zoom_min = None
+        self.zoom_max = None
+        self.tilt_min = None
+        self.tilt_max = None
+        self.pan_min = None
+        self.pan_max = None
+        self.frame_rate = None
+        self.resolution_width = None
+        self.resolution_height = None
+        self.bearing = 6
         self.load_config(location)
-        self.focal_length = (calibration.pixel_height * calibration.real_distance) / calibration.real_height
-        self.video_stream = VideoStream(self.address).start()
-
+        self.focal_length = calibration.zoom * ( (calibration.pixel_height * calibration.real_distance) / calibration.real_height)
+        self.video_stream = VideoStream(self.address, frame_rate=self.frame_rate,
+                                        resolution=(self.resolution_width, self.resolution_height))
+        kinematic.Kinematic.update_noise_function(1 / self.frame_rate)
     def load_config(self, camera_data):
         self.address = camera_data['address']
         self.lat = camera_data['latitude']
@@ -35,6 +41,23 @@ class Camera:
         self.tilt_max = camera_data['tilt_max']
         self.pan_min = camera_data['pan_min']
         self.pan_max = camera_data['pan_max']
-        self.capture_rate = camera_data['capture_rate']
+        self.frame_rate = camera_data['frame_rate']
         self.resolution_width = camera_data['resolution_width']
         self.resolution_height = camera_data['resolution_height']
+
+    def next_frame(self):
+        if self.estimate_frame_rate:
+            self.frames_read = self.frames_read + 1
+            now = datetime.datetime.now()
+            time_elapsed = now - self.time_of_first_read
+            if time_elapsed.seconds >= self.estimation_interval:
+                self.frame_rate = self.frames_read / time_elapsed.seconds
+                self.frames_read = 0
+                self.time_of_first_read = now
+                kinematic.Kinematic.update_noise_function(self.frame_rate)
+                print('New frame rate detected: ' + str(self.frame_rate))
+                self.estimation_interval = self.estimation_interval * 2
+                if self.estimation_interval > 600:
+                    self.estimation_interval = 600
+        (ok, frame) = self.video_stream.stream.stream.read()
+        return frame
