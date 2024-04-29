@@ -1,6 +1,6 @@
 {
     "camera" : {
-        "address": "rtsp://192.168.68.55/barca.mp4",
+        "address": "samples/barca.mp4",
         "latitude": -22.912759833,
         "longitude": -43.1582615,
         "standard_bearing": 336,

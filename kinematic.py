@@ -15,7 +15,8 @@ class Kinematic:
         self.geo_positions = GenericList(Kinematic.NUMBER_OF_SAMPLES)
         self.pixel_positions = GenericList(Kinematic.NUMBER_OF_SAMPLES)
         self.velocities = GenericList(Kinematic.NUMBER_OF_SAMPLES)
-        self.kf = self.init_kalman_filter()
+        self.kf_x = self.init_kalman_filter()
+        self.kf_y = self.init_kalman_filter()
         self.timestamp = datetime.now()
         self.distance_from_camera = None
         self.bearing = None
@@ -90,17 +91,23 @@ class Kinematic:
         course, speed = Kinematic.xy_to_polar(0, 0, vx, vy)
         return speed / delta_t, course
 
-    def apply_kalman_filter(self, x, y):
-        if self.kf.x is None:
-            self.kf.x = np.array([[x, y], [0, 0]])
-        self.kf.predict()
-        self.kf.update(x)
-        vx = self.kf.x[0]
-        vy = self.kf.x[1]
-        return vx, vy
+    def apply_kalman_filter(self,x, y):
+        if self.kf_x.x is None:
+            self.kf_x.x = np.array([[0], [0]])
+            self.kf_y.x = np.array([[0], [0]])
+        self.kf_x.predict()
+        self.kf_y.predict()
+        self.kf_x.update(x)
+        self.kf_y.update(y)
+        x = self.kf_x.x[0][0]
+        y = self.kf_y.x[0][0]
+        vx = self.kf_x.x[1][0]
+        vy = self.kf_y.x[1][0]
+        return x,y,vx, vy
 
     def update(self, bbox, frame_width, frame_height, camera, calibration, real_height):
-        self.kf.Q = Kinematic.Q
+        self.kf_x.Q = Kinematic.Q
+        self.kf_y.Q = Kinematic.Q
         timestamp_now = datetime.now()
         bbox_added = False
         if self.pixel_positions.get_current_value() is None:
@@ -120,19 +127,15 @@ class Kinematic:
 
             self.bearing = new_bearing
             self.distance_from_camera = new_distance
-            old_position_x = 0
-            old_position_y = 0
-            old_position = self.geo_positions.get_current_value()
-            # if old_position is not None:
-            #     old_position_x = old_position[0]
-            #     old_position_y = old_position[1]
             new_position_lat, new_position_lon = Kinematic.polar_to_geo(camera.lat, camera.lon, self.bearing,
                                                                         self.distance_from_camera)
             new_position_x, new_position_y = Kinematic.geo_to_xy(new_position_lat, new_position_lon)
-            vx, vy = self.apply_kalman_filter(new_position_x, new_position_y)
+            x,y, vx, vy = self.apply_kalman_filter(new_position_x, new_position_y)
             self.velocities.add_value([vx * 1.94384, vy * 1.94384])
             self.timestamp = timestamp_now
-            self.geo_positions.add_value([new_position_x, new_position_y])
+            self.geo_positions.add_value([x, y])
+            x_camera,y_camera = Kinematic.geo_to_xy(camera.lat, camera.lon)
+            self.distance_from_camera = Kinematic.euclidian_distance(x,y,x_camera,y_camera)
             if bbox_added is not True:
                 self.pixel_positions.add_value(bbox)
 
@@ -153,7 +156,7 @@ class Kinematic:
             lat, lon = Kinematic.xy_to_geo(xy[0], xy[1])
         vx_vy = self.velocities.get_current_value()
         if vx_vy is not None:
-            speed, course = Kinematic.calculate_speed_and_course(vx_vy[1][0], vx_vy[1][1], 1)
+            speed, course = Kinematic.calculate_speed_and_course(vx_vy[0], vx_vy[1], 1)
 
         return lat, lon, speed, course, bbox
 
@@ -167,4 +170,4 @@ class Kinematic:
 
     @staticmethod
     def update_noise_function(frame_rate):
-        Kinematic.Q = Q_discrete_white_noise(dim=2, dt=1 / frame_rate, var=0.005)
+        Kinematic.Q = Q_discrete_white_noise(dim=2, dt=1 / frame_rate, var=0.00013)

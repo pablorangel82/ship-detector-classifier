@@ -12,7 +12,7 @@ class Viewer:
     font_color = (0, 0, 0)
     rectangle_color = (0, 0, 0)
     rectangle_thickness = 2
-    depth_limit = None
+    depth_limit = 2000
 
     def build_label(self, image, text, location):
         label = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)

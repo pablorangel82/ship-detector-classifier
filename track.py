@@ -8,7 +8,7 @@ class Track:
         self.uuid = 'UUID-EN-CAMERA-' + str(uuid.uuid4())
         self.kinematic = kinematic.Kinematic()
         self.classification = classification.Classification()
-        self.name = ''
+        self.name = None
 
     def to_string(self):
         string = '\nId: ' + self.get_name() + '\n Classification: ' + self.classification.to_string() + '\n Kinematic: ' + self.kinematic.to_string()
