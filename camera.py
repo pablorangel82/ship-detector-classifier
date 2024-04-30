@@ -29,7 +29,7 @@ class Camera:
         self.focal_length = calibration.zoom * ( (calibration.pixel_height * calibration.real_distance) / calibration.real_height)
         self.video_stream = VideoStream(self.address, frame_rate=self.frame_rate,
                                         resolution=(self.resolution_width, self.resolution_height))
-        kinematic.Kinematic.update_noise_function(1 / self.frame_rate)
+        kinematic.Kinematic.update_noise_function(self.frame_rate)
     def load_config(self, camera_data):
         self.address = camera_data['address']
         self.lat = camera_data['latitude']

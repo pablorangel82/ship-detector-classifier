@@ -5,31 +5,35 @@ from filterpy.kalman import KalmanFilter
 import numpy as np
 from filterpy.common import Q_discrete_white_noise
 from GenericList import GenericList
-
+from scipy.linalg import block_diag
 
 class Kinematic:
     NUMBER_OF_SAMPLES = 1
+    dt = 1
     Q = None
 
     def __init__(self):
         self.geo_positions = GenericList(Kinematic.NUMBER_OF_SAMPLES)
         self.pixel_positions = GenericList(Kinematic.NUMBER_OF_SAMPLES)
         self.velocities = GenericList(Kinematic.NUMBER_OF_SAMPLES)
-        self.kf_x = self.init_kalman_filter()
-        self.kf_y = self.init_kalman_filter()
+        self.kf = self.init_kalman_filter()
         self.timestamp = datetime.now()
         self.distance_from_camera = None
         self.bearing = None
-        self.delta_t = -1
 
     def init_kalman_filter(self):
-        kf = KalmanFilter(dim_x=2, dim_z=1)
+        kf = KalmanFilter(dim_x=4, dim_z=2)
         kf.alpha = 1
         kf.x = None
-        kf.F = np.array([[1., 1.], [0., 1.]])
-        kf.H = np.array([[1., 0.]])
-        kf.P *= 1000.
-        kf.R = 5
+        kf.F = np.array([[1., Kinematic.dt, 0., 0.],
+                         [0., 1., 0., 0.],
+                         [0., 0., 1., Kinematic.dt],
+                         [0., 0., 0., 1.]])
+        kf.H = np.array([[1., 0., 0., 0.],
+                        [0., 0., 1., 0.]])
+        P = (10000.,10000,10000,10000)
+        kf.P *= np.diag(P)
+        kf.R = 1
         kf.Q = Kinematic.Q
         return kf
 
@@ -92,29 +96,29 @@ class Kinematic:
         return speed / delta_t, course
 
     def apply_kalman_filter(self,x, y):
-        if self.kf_x.x is None:
-            self.kf_x.x = np.array([[0], [0]])
-            self.kf_y.x = np.array([[0], [0]])
-        self.kf_x.predict()
-        self.kf_y.predict()
-        self.kf_x.update(x)
-        self.kf_y.update(y)
-        x = self.kf_x.x[0][0]
-        y = self.kf_y.x[0][0]
-        vx = self.kf_x.x[1][0]
-        vy = self.kf_y.x[1][0]
-        return x,y,vx, vy
+        if self.kf.x is None:
+            self.kf.x = np.array([1., 0., 1., 0.])
+        self.kf.predict()
+        self.kf.update([[x,y]])
+        x = self.kf.x[0]
+        y = self.kf.x[2]
+        vx = self.kf.x[1]
+        vy = self.kf.x[3]
+        return x,y,vx,vy
 
     def update(self, bbox, frame_width, frame_height, camera, calibration, real_height):
-        self.kf_x.Q = Kinematic.Q
-        self.kf_y.Q = Kinematic.Q
+        self.kf.Q = Kinematic.Q
+
         timestamp_now = datetime.now()
         bbox_added = False
         if self.pixel_positions.get_current_value() is None:
             self.pixel_positions.add_value(bbox)
             bbox_added = True
         time_elapsed = Kinematic.delta_time(self.timestamp, timestamp_now)
-        if time_elapsed > self.delta_t:
+        self.kf.F[0][1]= Kinematic.dt
+        self.kf.F[2][3]= Kinematic.dt
+
+        if time_elapsed > -1:
             distance = (real_height * camera.focal_length) / self.get_pixel_coordinates()[3]
             distance = (distance / 1000)  # mm to m
             new_center_pixel_x = bbox[0] + int(bbox[2] / 2)
@@ -133,9 +137,7 @@ class Kinematic:
             x,y, vx, vy = self.apply_kalman_filter(new_position_x, new_position_y)
             self.velocities.add_value([vx * 1.94384, vy * 1.94384])
             self.timestamp = timestamp_now
-            self.geo_positions.add_value([x, y])
-            x_camera,y_camera = Kinematic.geo_to_xy(camera.lat, camera.lon)
-            self.distance_from_camera = Kinematic.euclidian_distance(x,y,x_camera,y_camera)
+            self.geo_positions.add_value([new_position_x, new_position_y])
             if bbox_added is not True:
                 self.pixel_positions.add_value(bbox)
 
@@ -170,4 +172,7 @@ class Kinematic:
 
     @staticmethod
     def update_noise_function(frame_rate):
-        Kinematic.Q = Q_discrete_white_noise(dim=2, dt=1 / frame_rate, var=0.00013)
+        Kinematic.dt = 1 / frame_rate
+        print(Kinematic.dt)
+        q = Q_discrete_white_noise(dim=2, dt=Kinematic.dt, var=0.00013)
+        Kinematic.Q = block_diag(q,q)

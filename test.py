@@ -17,6 +17,7 @@ from track import Track
 # camera1 = Camera(None,None,[0,0,0])
 #
 print(kinematic.Kinematic.polar_to_xy(1000, 1000, 90, 100))
+print(kinematic.Kinematic.xy_to_polar(0,0,-100,-50))
 # bearing, distance = kinematic.Kinematic.xy_to_polar(0,0, 1200 - (1920/2) ,1080)
 # print(bearing, distance)
 # bearing, distance = kinematic.Kinematic.geo_to_polar(-22.912759833, -43.1582615, -22.89750771788674, -43.15667996000589)

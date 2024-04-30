@@ -21,7 +21,7 @@
         "alpha" : 0,
         "beta" : 0.2,
         "threshold_detection" : 0.42,
-        "threshold_detection_vessel" : 0.6,
+        "threshold_detection_vessel" : 0.68,
         "threshold_classification_vessel" : 0.6,
         "zoom": 1.8
     }
