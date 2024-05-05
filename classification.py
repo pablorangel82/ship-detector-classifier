@@ -1,12 +1,11 @@
 from datetime import datetime
 
-
 class Classification:
 
-    def __init__(self):
-        self.category = ''
+    def __init__(self, category):
+        self.category = category
         self.category_index = 5
-        self.timestamp = 0
+        self.timestamp = datetime.now()
         self.classification_confidence = 0
         self.detection_confidence = 0
         self.votes = [0, 0, 0, 0, 0, 0]
@@ -26,4 +25,5 @@ class Classification:
         self.timestamp = datetime.now()
 
     def to_string(self):
-        return (self.category.description).upper() + ' (' + str(round(self.classification_confidence * 100)) + ')'
+        # return (self.category.description).upper() + ' (' + str(round(self.classification_confidence * 100)) + ')'
+        return (self.category.description).upper()

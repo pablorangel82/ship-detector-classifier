@@ -1,6 +1,4 @@
 opencv-python
-keras
-tensorflow
 numpy
 scikit-learn
 pyproj

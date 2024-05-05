@@ -4,10 +4,10 @@ import kinematic
 
 
 class Track:
-    def __init__(self):
+    def __init__(self, category):
         self.uuid = 'UUID-EN-CAMERA-' + str(uuid.uuid4())
         self.kinematic = kinematic.Kinematic()
-        self.classification = classification.Classification()
+        self.classification = classification.Classification(category)
         self.name = None
 
     def to_string(self):
@@ -16,6 +16,6 @@ class Track:
 
     def get_name(self):
         name = self.name
-        if name is None:
-            name = self.uuid[len(self.uuid) - 3] + self.uuid[len(self.uuid) - 2] + self.uuid[len(self.uuid) - 1]
+        # if name is None:
+        #     name = self.uuid[len(self.uuid) - 3] + self.uuid[len(self.uuid) - 2] + self.uuid[len(self.uuid) - 1]
         return name

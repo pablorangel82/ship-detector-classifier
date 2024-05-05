@@ -10,7 +10,7 @@
         "tilt_max": 90,
         "pan_min": -90,
         "pan_max": 90,
-        "frame_rate": 60,
+        "frame_rate": 30,
         "resolution_width": 1920,
         "resolution_height": 1080
     },
@@ -20,9 +20,11 @@
         "real_distance" : 1370000,
         "alpha" : 0,
         "beta" : 0.2,
-        "threshold_detection" : 0.42,
-        "threshold_detection_vessel" : 0.68,
-        "threshold_classification_vessel" : 0.6,
-        "zoom": 1.8
+        "threshold_detection" : 0.6,
+        "threshold_detection_vessel" : 0.3,
+        "threshold_classification_vessel" : 0.8,
+        "zoom": 1.8,
+        "detection_interval": 0.5,
+        "classification_interval": 3
     }
 }

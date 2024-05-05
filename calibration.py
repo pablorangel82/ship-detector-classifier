@@ -10,3 +10,5 @@ class Calibration:
         self.alpha = calibration_data['alpha']
         self.beta = calibration_data['beta']
         self.zoom = calibration_data['zoom']
+        self.detection_interval = calibration_data['detection_interval']
+        self.classification_interval = calibration_data['classification_interval']

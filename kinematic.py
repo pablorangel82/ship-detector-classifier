@@ -13,6 +13,7 @@ class Kinematic:
     Q = None
 
     def __init__(self):
+        self.lost = False
         self.geo_positions = GenericList(Kinematic.NUMBER_OF_SAMPLES)
         self.pixel_positions = GenericList(Kinematic.NUMBER_OF_SAMPLES)
         self.velocities = GenericList(Kinematic.NUMBER_OF_SAMPLES)
@@ -108,38 +109,36 @@ class Kinematic:
 
     def update(self, bbox, frame_width, frame_height, camera, calibration, real_height):
         self.kf.Q = Kinematic.Q
-
+        self.lost = False
         timestamp_now = datetime.now()
         bbox_added = False
         if self.pixel_positions.get_current_value() is None:
             self.pixel_positions.add_value(bbox)
             bbox_added = True
-        time_elapsed = Kinematic.delta_time(self.timestamp, timestamp_now)
         self.kf.F[0][1]= Kinematic.dt
         self.kf.F[2][3]= Kinematic.dt
 
-        if time_elapsed > -1:
-            distance = (real_height * camera.focal_length) / self.get_pixel_coordinates()[3]
-            distance = (distance / 1000)  # mm to m
-            new_center_pixel_x = bbox[0] + int(bbox[2] / 2)
-            bearing_pixel, distance_pixel = Kinematic.xy_to_polar(0, 0, new_center_pixel_x - (frame_width / 2),
-                                                                  frame_height)
-            new_bearing = camera.bearing + bearing_pixel
-            if new_bearing > 360:
-                new_bearing = 360 - new_bearing
-            new_distance = distance
+        distance = (real_height * camera.focal_length) / self.get_pixel_coordinates()[3]
+        distance = (distance / 1000)  # mm to m
+        new_center_pixel_x = bbox[0] + int(bbox[2] / 2)
+        bearing_pixel, distance_pixel = Kinematic.xy_to_polar(0, 0, new_center_pixel_x - (frame_width / 2),
+                                                              frame_height)
+        new_bearing = camera.bearing + bearing_pixel
+        if new_bearing > 360:
+            new_bearing = 360 - new_bearing
+        new_distance = distance
 
-            self.bearing = new_bearing
-            self.distance_from_camera = new_distance
-            new_position_lat, new_position_lon = Kinematic.polar_to_geo(camera.lat, camera.lon, self.bearing,
-                                                                        self.distance_from_camera)
-            new_position_x, new_position_y = Kinematic.geo_to_xy(new_position_lat, new_position_lon)
-            x,y, vx, vy = self.apply_kalman_filter(new_position_x, new_position_y)
-            self.velocities.add_value([vx * 1.94384, vy * 1.94384])
-            self.timestamp = timestamp_now
-            self.geo_positions.add_value([new_position_x, new_position_y])
-            if bbox_added is not True:
-                self.pixel_positions.add_value(bbox)
+        self.bearing = new_bearing
+        self.distance_from_camera = new_distance
+        new_position_lat, new_position_lon = Kinematic.polar_to_geo(camera.lat, camera.lon, self.bearing,
+                                                                    self.distance_from_camera)
+        new_position_x, new_position_y = Kinematic.geo_to_xy(new_position_lat, new_position_lon)
+        x,y, vx, vy = self.apply_kalman_filter(new_position_x, new_position_y)
+        self.velocities.add_value([vx * 1.94384, vy * 1.94384])
+        self.timestamp = timestamp_now
+        self.geo_positions.add_value([new_position_x, new_position_y])
+        if bbox_added is not True:
+            self.pixel_positions.add_value(bbox)
 
     def get_pixel_coordinates(self):
         return self.pixel_positions.get_current_value()
@@ -159,7 +158,11 @@ class Kinematic:
         vx_vy = self.velocities.get_current_value()
         if vx_vy is not None:
             speed, course = Kinematic.calculate_speed_and_course(vx_vy[0], vx_vy[1], 1)
-
+        if speed <= 2:
+            course = 0
+        if speed >= 40:
+            speed = None
+            course = None
         return lat, lon, speed, course, bbox
 
     def to_string(self):
@@ -171,8 +174,7 @@ class Kinematic:
         return string
 
     @staticmethod
-    def update_noise_function(frame_rate):
-        Kinematic.dt = 1 / frame_rate
-        print(Kinematic.dt)
+    def update_noise_function(dt):
+        Kinematic.dt = dt
         q = Q_discrete_white_noise(dim=2, dt=Kinematic.dt, var=0.00013)
         Kinematic.Q = block_diag(q,q)

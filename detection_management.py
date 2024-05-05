@@ -1,3 +1,4 @@
+import kinematic
 from category import Category
 import json
 from datetime import datetime
@@ -5,22 +6,17 @@ import time
 from threading import Thread, Semaphore
 from calibration import Calibration
 from camera import Camera
+from kinematic import Kinematic
 from track import Track
-import os
 import cv2
 import filters
-
-CUDA_SUPPORT = False
-ESTIMATE_FRAME_RATE = True
-
-if CUDA_SUPPORT:
-    os.add_dll_directory("C:\\CUDNN\\8.9\\bin\\")
-
 
 class DetectionManagement(Thread):
 
     def __init__(self, detector_model, detector_config, classifier_model, location, language):
         Thread.__init__(self)
+        self.timestamp_detection = datetime.now()
+        self.timestamp_classification = datetime.now()
         self.categories = {}
         self.tracks_list = {}
         self.pixel_inc_width = 80
@@ -31,24 +27,25 @@ class DetectionManagement(Thread):
         camera_data = config_data['camera']
         calibration_data = config_data['calibration']
         self.calibration = Calibration(calibration_data)
-        self.camera = Camera(camera_data, self.calibration, ESTIMATE_FRAME_RATE)
-        self.frame_width = self.camera.resolution_width
-        self.frame_height = self.camera.resolution_height
+        kinematic.Kinematic.update_noise_function(self.calibration.detection_interval)
         self.load_categories(language)
         self.net_detector = cv2.dnn_DetectionModel(detector_model, detector_config)
-        if CUDA_SUPPORT:
-            self.net_detector.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
-            self.net_detector.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA)
         self.net_detector.setInputSize(320, 320)
         self.net_detector.setInputScale(1.0 / 127.5)
         self.net_detector.setInputMean((127.5, 127.5, 127.5))
         self.net_detector.setInputSwapRB(True)
         self.net_classifier = cv2.dnn.readNetFromTensorflow(classifier_model)
-        if CUDA_SUPPORT:
+        count = cv2.cuda.getCudaEnabledDeviceCount()
+        print('Number of GPUs: ' + str(count))
+        if count > 0:
+            print('CUDA ENABLED')
+            self.net_detector.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
+            self.net_detector.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA)
             self.net_classifier.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
             self.net_classifier.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA)
-            count = cv2.cuda.getCudaEnabledDeviceCount()
-            print('Number of GPUs: ' + str(count))
+        self.camera = Camera(camera_data, self.calibration)
+        self.frame_width = self.camera.resolution_width
+        self.frame_height = self.camera.resolution_height
 
     def load_categories(self, language):
         json_file = open('classifier/ship_types_' + language + '.json')
@@ -82,8 +79,12 @@ class DetectionManagement(Thread):
         raw_img = self.camera.next_frame()
         if raw_img is not None:
             # img_for_detection = cv2.convertScaleAbs(raw_img, alpha=self.calibration.alpha, beta=self.calibration.beta)
-            detections = self.detect(raw_img)
-            self.classify(raw_img, detections)
+            now = datetime.now()
+            elapsed_time = now - self.timestamp_detection
+            if elapsed_time.seconds >= Kinematic.dt:
+                detections = self.detect(raw_img)
+                self.timestamp_detection = datetime.now()
+                self.classify(raw_img, detections)
             return raw_img, self.tracks_list
         return None, None
 
@@ -117,21 +118,33 @@ class DetectionManagement(Thread):
 
             vessel_img = raw_img[y:y + size_h, x:x + size_w]
             vessel_img, w, h = filters.transform(vessel_img, size_w, size_h)
-            new_img = cv2.normalize(vessel_img, None, self.calibration.alpha, self.calibration.beta, cv2.NORM_MINMAX,
-                                    dtype=cv2.CV_32F)
-            # cv2.imshow('Ship Detector', vessel_img)
-            self.net_classifier.setInput(
-                cv2.dnn.blobFromImage(new_img, size=(filters.crop_max, filters.crop_max), swapRB=True, crop=False))
-            predictions = self.net_classifier.forward()
+            new_img = cv2.normalize(vessel_img, None, self.calibration.alpha, self.calibration.beta, cv2.NORM_MINMAX,dtype=cv2.CV_32F)
+
+            predictions = None
+            now = datetime.now()
+            elapsed_time = now - self.timestamp_classification
+            if elapsed_time.seconds >= self.calibration.classification_interval:
+                detections = self.detect(raw_img)
+                self.timestamp_classification = datetime.now()
+                self.classify(raw_img, detections)
+                self.net_classifier.setInput(cv2.dnn.blobFromImage(new_img, size=(filters.crop_max, filters.crop_max), swapRB=True, crop=False))
+                predictions = self.net_classifier.forward()
+
             self.update(detection_confidence, predictions, [x, y, size_w, size_h])
 
     def update(self, detection_confidence, predictions, detected_bbox):
-        max_index = 0
-        max_value = predictions[0][0]
-        for i in range(len(predictions[0])):
-            if max_value < predictions[0][i]:
-                max_index = i
-                max_value = predictions[0][i]
+        max_value = None
+        max_index = None
+        if predictions is not None:
+            max_index = 0
+            max_value = predictions[0][0]
+            for i in range(len(predictions[0])):
+                if max_value < predictions[0][i]:
+                    max_index = i
+                    max_value = predictions[0][i]
+            if max_value < self.calibration.threshold_classification_vessel:
+                max_index = 5
+                max_value = 1
         track_existent = None
         with self.control_access_track_list:
             for track in self.tracks_list.values():
@@ -149,14 +162,11 @@ class DetectionManagement(Thread):
                     else:
                         if track_existent.classification.detection_confidence < track.classification.detection_confidence:
                             track_existent = track
-            if max_value < self.calibration.threshold_classification_vessel:
-                max_index = 5
-                max_value = 1
-
             if track_existent is None:
-                track_existent = Track()
+                track_existent = Track(self.categories[5])
 
-            track_existent.classification.update(detection_confidence, max_value, self.categories, max_index)
+            if max_value is not None:
+                track_existent.classification.update(detection_confidence, max_value, self.categories, max_index)
             track_existent.kinematic.update(detected_bbox, self.frame_width, self.frame_height, self.camera,
                                             self.calibration, track_existent.classification.category.avg_height)
 
@@ -171,7 +181,9 @@ class DetectionManagement(Thread):
                 actual_time = datetime.now()
                 k_diff = actual_time - track.kinematic.timestamp
                 c_diff = actual_time - track.classification.timestamp
-                if k_diff.seconds > 5 and c_diff.seconds > 5:
+                if k_diff.seconds > 5 * Kinematic.dt and c_diff.seconds > 5 * Kinematic.dt:
+                    track.kinematic.lost = True
+                if k_diff.seconds > 10 * Kinematic.dt and c_diff.seconds > 10 * Kinematic.dt:
                     tracks_to_remove.append(track)
 
             with self.control_access_track_list:

@@ -1,0 +1,7 @@
+pre_built_libs/opencv_contrib_python-4.9.0.80-cp37-abi3-win_amd64.whl
+numpy
+scikit-learn
+pyproj
+pillow
+filterpy
+imutils

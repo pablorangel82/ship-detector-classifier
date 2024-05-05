@@ -12,7 +12,7 @@ while True:
     img_to_show,tracks_list = detection_management.detect_estimate_and_classify()
     if img_to_show is not None:
         viewer.show_image(img_to_show, tracks_list, detection_management.control_access_track_list)
-    if viewer.quit_command():
+    if viewer.quit_command(int(detection_management.camera.frame_rate)):
         break
 
 viewer.exit()
