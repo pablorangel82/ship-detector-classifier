@@ -158,11 +158,6 @@ class Kinematic:
         vx_vy = self.velocities.get_current_value()
         if vx_vy is not None:
             speed, course = Kinematic.calculate_speed_and_course(vx_vy[0], vx_vy[1], 1)
-        if speed <= 2:
-            course = 0
-        if speed >= 40:
-            speed = None
-            course = None
         return lat, lon, speed, course, bbox
 
     def to_string(self):

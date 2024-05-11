@@ -21,10 +21,10 @@
         "alpha" : 0,
         "beta" : 0.2,
         "threshold_detection" : 0.6,
-        "threshold_detection_vessel" : 0.3,
+        "threshold_detection_vessel" : 0.65,
         "threshold_classification_vessel" : 0.8,
         "zoom": 1.8,
-        "detection_interval": 0.5,
+        "detection_interval": 1,
         "classification_interval": 3
     }
 }

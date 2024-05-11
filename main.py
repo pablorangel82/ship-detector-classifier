@@ -1,18 +1,30 @@
+import time
+
+import viewer
 from detection_management import DetectionManagement
-from viewer import Viewer
+import stream_server
+
+resolution = (1920,1080)
+EMBEDDED_VIEWER = False
+FORCED_DELAY = 0.03 #seconds
 
 detector_model = 'detector/detector.pb'
 detector_config = 'detector/detector.pbtxt'
 classifier_model = 'classifier/classifier.pb'
 detection_management = DetectionManagement(detector_model,detector_config,classifier_model,'rstp_example', 'ptbr')
 detection_management.start()
-viewer = Viewer()
+viewer = viewer.Viewer(resolution)
+stream_server.run()
 
 while True:
-    img_to_show,tracks_list = detection_management.detect_estimate_and_classify()
-    if img_to_show is not None:
-        viewer.show_image(img_to_show, tracks_list, detection_management.control_access_track_list)
-    if viewer.quit_command(int(detection_management.camera.frame_rate)):
-        break
 
-viewer.exit()
+    img_to_show,tracks_list = detection_management.detect_estimate_and_classify()
+
+    if img_to_show is not None:
+        if EMBEDDED_VIEWER:
+            viewer.show_image(img_to_show,tracks_list)
+            viewer.quit_command(detection_management.camera.frame_rate)
+        else:
+            stream_server.generate(img_to_show, tracks_list)
+            if FORCED_DELAY > 0:
+                time.sleep(FORCED_DELAY)

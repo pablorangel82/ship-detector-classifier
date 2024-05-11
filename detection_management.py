@@ -1,3 +1,5 @@
+import copy
+
 import kinematic
 from category import Category
 import json
@@ -85,7 +87,8 @@ class DetectionManagement(Thread):
                 detections = self.detect(raw_img)
                 self.timestamp_detection = datetime.now()
                 self.classify(raw_img, detections)
-            return raw_img, self.tracks_list
+            with self.control_access_track_list:
+                return copy.deepcopy(raw_img), copy.deepcopy(self.tracks_list)
         return None, None
 
     def detect(self, img_for_detection):
@@ -181,8 +184,9 @@ class DetectionManagement(Thread):
                 actual_time = datetime.now()
                 k_diff = actual_time - track.kinematic.timestamp
                 c_diff = actual_time - track.classification.timestamp
-                if k_diff.seconds > 5 * Kinematic.dt and c_diff.seconds > 5 * Kinematic.dt:
+                if track.kinematic.lost is False and k_diff.seconds > 5 * Kinematic.dt and c_diff.seconds > 5 * Kinematic.dt:
                     track.kinematic.lost = True
+                    continue
                 if k_diff.seconds > 10 * Kinematic.dt and c_diff.seconds > 10 * Kinematic.dt:
                     tracks_to_remove.append(track)
 

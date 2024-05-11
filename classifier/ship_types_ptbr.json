@@ -1,12 +1,12 @@
 {
     "cargo":{
         "id" : 0,
-        "description" : "Cargueiro de Proposito Geral",
+        "description" : "Cargueiro de Propósito Geral",
         "avg_height" : 5500
     },
     "military":{
         "id": 1,
-        "description": "Militar",
+        "description": "Embarcação Militar",
         "avg_height": 5500
     },
     "carrier":{

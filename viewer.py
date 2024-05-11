@@ -14,9 +14,9 @@ class Viewer:
     max_height_class = 20
     max_height_kinematic = 120
 
-    def __init__(self):
+    def __init__(self, monitor_resolution):
         self.hidra_logo = cv2.resize(cv2.imread('viewer/resources/hidra.png', ), (256, 56))
-        self.monitor_resolution = (800, 600)
+        self.monitor_resolution = monitor_resolution
         self.font_thickness = 2
         self.font_color_not_lost = (0, 153, 255)
         self.font_color_lost = (153, 255, 204)
@@ -99,10 +99,8 @@ class Viewer:
     def draw_rectangle(self, image, pos, color):
         cv2.rectangle(image, pos, color=color, thickness=self.rectangle_thickness)
 
-    def show_image(self, img_to_show, tracks_list, semaphore):
-        with semaphore:
-            tracks_list_copy = tracks_list.copy()
-        for track in tracks_list_copy.values():
+    def show_image(self, img_to_show, tracks_list):
+        for track in tracks_list.values():
             if self.depth_limit is not None:
                 if track.kinematic.distance_from_camera is not None:
                     if track.kinematic.distance_from_camera > self.depth_limit:
