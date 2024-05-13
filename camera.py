@@ -44,3 +44,14 @@ class Camera:
     def next_frame(self):
         (ok, frame) = self.video_stream.stream.stream.read()
         return frame
+
+    def set_bearing(self,pan):
+        bearing = 0
+        if pan > 0:
+            bearing = pan * 180
+        else:
+            bearing = 360 - (180 * (pan * -1))
+        bearing = bearing + self.ref_bearing
+        if bearing > 360:
+            bearing = bearing - 360
+        self.bearing = bearing

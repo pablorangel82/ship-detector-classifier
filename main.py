@@ -6,7 +6,7 @@ import stream_server
 
 resolution = (1920,1080)
 EMBEDDED_VIEWER = False
-FORCED_DELAY = 0.03 #seconds
+FORCED_DELAY = 0.02 #seconds
 
 detector_model = 'detector/detector.pb'
 detector_config = 'detector/detector.pbtxt'
