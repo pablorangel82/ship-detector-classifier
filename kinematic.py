@@ -118,8 +118,9 @@ class Kinematic:
         self.kf.F[0][1]= Kinematic.dt
         self.kf.F[2][3]= Kinematic.dt
 
-        distance = camera.zoom * ((real_height * camera.focal_length) / self.get_pixel_coordinates()[3])
+        distance = ((real_height * camera.focal_length) / self.get_pixel_coordinates()[3])
         distance = (distance / 1000)  # mm to m
+        distance += distance * camera.zoom
         new_center_pixel_x = bbox[0] + int(bbox[2] / 2)
         bearing_pixel, distance_pixel = Kinematic.xy_to_polar(0, 0, new_center_pixel_x - (frame_width / 2),
                                                               frame_height)

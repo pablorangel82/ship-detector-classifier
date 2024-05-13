@@ -11,6 +11,7 @@ class Camera:
         self.lat = None
         self.lon = None
         self.ref_bearing = None
+        self.zoom = None
         self.zoom_min = None
         self.zoom_max = None
         self.tilt_min = None
@@ -45,7 +46,7 @@ class Camera:
         (ok, frame) = self.video_stream.stream.stream.read()
         return frame
 
-    def set_bearing(self,pan):
+    def set_ptz(self,pan, tilt, zoom):
         bearing = 0
         if pan > 0:
             bearing = pan * 180
@@ -55,3 +56,6 @@ class Camera:
         if bearing > 360:
             bearing = bearing - 360
         self.bearing = bearing
+        self.zoom = zoom
+
+
