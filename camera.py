@@ -11,7 +11,6 @@ class Camera:
         self.lat = None
         self.lon = None
         self.ref_bearing = None
-        self.zoom = None
         self.zoom_min = None
         self.zoom_max = None
         self.tilt_min = None
@@ -21,6 +20,7 @@ class Camera:
         self.frame_rate = None
         self.resolution_width = None
         self.resolution_height = None
+        self.zoom = 0
         self.bearing = 6
         self.load_config(location)
         self.focal_length = calibration.zoom * ( (calibration.pixel_height * calibration.real_distance) / calibration.real_height)
