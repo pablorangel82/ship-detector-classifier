@@ -1,31 +1,36 @@
 {
-    "cargo":{
+    "cargoship":{
         "id" : 0,
-        "description" : "Cargueiro de Propósito Geral",
+        "description" : "Cargueiro",
         "avg_height" : 5500
     },
-    "military":{
-        "id": 1,
-        "description": "Embarcação Militar",
-        "avg_height": 5500
-    },
-    "carrier":{
-        "id": 2,
-        "description": "Transporte de Pessoas ou Cargas",
-        "avg_height": 5500
-    },
     "cruise":{
-        "id": 3,
-        "description": "Transporte de Pessoas",
+        "id": 1,
+        "description": "Transporte de Passageiros",
         "avg_height": 5500
     },
-    "tanker":{
+    "fishingboat":{
+        "id": 2,
+        "description": "Navio Pesqueiro",
+        "avg_height": 5500
+    },
+    "passengership":{
+        "id": 3,
+        "description": "Transporte de Passageiros",
+        "avg_height": 5500
+    },
+    "sailboat":{
         "id": 4,
-        "description": "Navio Tanque",
+        "description": "Barco a Vela",
+        "avg_height": 5500
+    },
+    "warship":{
+        "id": 5,
+        "description": "Navio Militar",
         "avg_height": 5500
     },
     "unknown":{
-        "id": 5,
+        "id": 6,
         "description": "Desconhecido",
         "avg_height": 5500
     }

@@ -1,8 +1,7 @@
-opencv-python
-numpy
 scikit-learn
 pyproj
 pillow
 filterpy
 imutils
 flask
+opencv-python

@@ -1,5 +1,5 @@
 import copy
-
+import filters
 import kinematic
 from category import Category
 import json
@@ -10,19 +10,17 @@ from calibration import Calibration
 from camera import Camera
 from kinematic import Kinematic
 from track import Track
-import cv2
-import filters
+import torch
+from ultralytics import YOLO
 
 class DetectionManagement(Thread):
 
-    def __init__(self, detector_model, detector_config, classifier_model, location, language):
+    def __init__(self, location, language):
         Thread.__init__(self)
         self.timestamp_detection = datetime.now()
         self.timestamp_classification = datetime.now()
         self.categories = {}
         self.tracks_list = {}
-        self.pixel_inc_width = 80
-        self.pixel_inc_height = 80
         self.control_access_track_list = Semaphore(1)
         json_file = open('config/' + location + '.json')
         config_data = json.load(json_file)
@@ -31,37 +29,25 @@ class DetectionManagement(Thread):
         self.calibration = Calibration(calibration_data)
         kinematic.Kinematic.update_noise_function(self.calibration.detection_interval)
         self.load_categories(language)
-        self.net_detector = cv2.dnn_DetectionModel(detector_model, detector_config)
-        self.net_detector.setInputSize(320, 320)
-        self.net_detector.setInputScale(1.0 / 127.5)
-        self.net_detector.setInputMean((127.5, 127.5, 127.5))
-        self.net_detector.setInputSwapRB(True)
-        self.net_classifier = cv2.dnn.readNetFromTensorflow(classifier_model)
-        count = cv2.cuda.getCudaEnabledDeviceCount()
+        count = torch.cuda.device_count()
         print('Number of GPUs: ' + str(count))
-        if count > 0:
+        device = 'cpu'
+        if torch.cuda.is_available():
             print('CUDA ENABLED')
-            self.net_detector.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
-            self.net_detector.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA)
-            self.net_classifier.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
-            self.net_classifier.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA)
+            device = 'cuda'
+
+        self.net_classifier = YOLO("classifier/best.pt").to(device)
+        self.net_classifier.conf = self.calibration.threshold_detection
+        self.net_classifier.iou = 0.6
+        self.net_classifier.agnostic = False  # NMS class-agnostic
+        self.net_classifier.multi_label = False
         self.camera = Camera(camera_data, self.calibration)
-        self.frame_width = self.camera.resolution_width
-        self.frame_height = self.camera.resolution_height
 
     def load_categories(self, language):
         json_file = open('classifier/ship_types_' + language + '.json')
         config_data = json.load(json_file)
 
-        data = config_data['cargo']
-        category = Category(data['id'], data['description'], data['avg_height'])
-        self.categories[category.id] = category
-
-        data = config_data['military']
-        category = Category(data['id'], data['description'], data['avg_height'])
-        self.categories[category.id] = category
-
-        data = config_data['carrier']
+        data = config_data['cargoship']
         category = Category(data['id'], data['description'], data['avg_height'])
         self.categories[category.id] = category
 
@@ -69,7 +55,19 @@ class DetectionManagement(Thread):
         category = Category(data['id'], data['description'], data['avg_height'])
         self.categories[category.id] = category
 
-        data = config_data['tanker']
+        data = config_data['fishingboat']
+        category = Category(data['id'], data['description'], data['avg_height'])
+        self.categories[category.id] = category
+
+        data = config_data['passengership']
+        category = Category(data['id'], data['description'], data['avg_height'])
+        self.categories[category.id] = category
+
+        data = config_data['sailboat']
+        category = Category(data['id'], data['description'], data['avg_height'])
+        self.categories[category.id] = category
+
+        data = config_data['warship']
         category = Category(data['id'], data['description'], data['avg_height'])
         self.categories[category.id] = category
 
@@ -80,74 +78,37 @@ class DetectionManagement(Thread):
     def detect_estimate_and_classify(self):
         raw_img = self.camera.next_frame()
         if raw_img is not None:
-            # img_for_detection = cv2.convertScaleAbs(raw_img, alpha=self.calibration.alpha, beta=self.calibration.beta)
             now = datetime.now()
             elapsed_time = now - self.timestamp_detection
             if elapsed_time.seconds >= Kinematic.dt:
-                detections = self.detect(raw_img)
                 self.timestamp_detection = datetime.now()
-                self.classify(raw_img, detections)
+                self.detect_and_classify(raw_img)
             with self.control_access_track_list:
                 return copy.deepcopy(raw_img), copy.deepcopy(self.tracks_list)
         return None, None
 
-    def detect(self, img_for_detection):
-        detections = []
-        classIds, confs, bbox = self.net_detector.detect(img_for_detection,
-                                                         confThreshold=self.calibration.threshold_detection)
-        if len(classIds) != 0:
-            for classId, confidence, box in zip(classIds.flatten(), confs.flatten(), bbox):
-                if classId == 9 and confidence > self.calibration.threshold_detection_vessel:
-                    detections.append([confidence, box])
-        return detections
+    def detect_and_classify(self, raw_img):
+        self.frame_height, self.frame_width, channels = raw_img.shape
+        detection_results = self.net_classifier.predict([raw_img],verbose=True)
 
-    def classify(self, raw_img, detections):
-        for detection in detections:
-            detection_confidence = detection[0]
-            x = detection[1][0]
-            y = detection[1][1]
-            w = detection[1][2]
-            h = detection[1][3]
+        for result in detection_results:
+            detection_count = result.boxes.shape[0]
+            for i in range(detection_count):
+                cls = int(result.boxes.cls[i].item())
+                name = result.names[cls]
+                confidence = float(result.boxes.conf[i].item())
+                if confidence < self.calibration.threshold_detection:
+                    continue
+                bounding_box = result.boxes.xyxy[i].tolist()
+                x = int(bounding_box[0])
+                y = int(bounding_box[1])
+                width = int(bounding_box[2] - x)
+                height = int(bounding_box[3] - y)
+                bbox = [x, y, width, height]
+                self.estimate(confidence, cls, bbox)
 
-            x = x - int(self.pixel_inc_width / 2)
-            y = y - int(self.pixel_inc_height / 2)
-            size_w = w + self.pixel_inc_width
-            size_h = h + self.pixel_inc_height
+    def estimate(self, confidence, label, detected_bbox):
 
-            if x < 0:
-                x = 0
-            if y < 0:
-                y = 0
-
-            vessel_img = raw_img[y:y + size_h, x:x + size_w]
-            vessel_img, w, h = filters.transform(vessel_img, size_w, size_h)
-            new_img = cv2.normalize(vessel_img, None, self.calibration.alpha, self.calibration.beta, cv2.NORM_MINMAX,dtype=cv2.CV_32F)
-
-            predictions = None
-            now = datetime.now()
-            elapsed_time = now - self.timestamp_classification
-            if elapsed_time.seconds >= self.calibration.classification_interval:
-                detections = self.detect(raw_img)
-                self.timestamp_classification = datetime.now()
-                self.classify(raw_img, detections)
-                self.net_classifier.setInput(cv2.dnn.blobFromImage(new_img, size=(filters.crop_max, filters.crop_max), swapRB=True, crop=False))
-                predictions = self.net_classifier.forward()
-
-            self.update(detection_confidence, predictions, [x, y, size_w, size_h])
-
-    def update(self, detection_confidence, predictions, detected_bbox):
-        max_value = None
-        max_index = None
-        if predictions is not None:
-            max_index = 0
-            max_value = predictions[0][0]
-            for i in range(len(predictions[0])):
-                if max_value < predictions[0][i]:
-                    max_index = i
-                    max_value = predictions[0][i]
-            if max_value < self.calibration.threshold_classification_vessel:
-                max_index = 5
-                max_value = 1
         track_existent = None
         with self.control_access_track_list:
             for track in self.tracks_list.values():
@@ -163,15 +124,16 @@ class DetectionManagement(Thread):
                     if track_existent is None:
                         track_existent = track
                     else:
-                        if track_existent.classification.detection_confidence < track.classification.detection_confidence:
+                        if track_existent.classification.confidence < track.classification.confidence:
                             track_existent = track
             if track_existent is None:
-                track_existent = Track(self.categories[5])
-
-            if max_value is not None:
-                track_existent.classification.update(detection_confidence, max_value, self.categories, max_index)
+                track_existent = Track(self.categories[len(self.categories) - 1])
+            if confidence < self.calibration.threshold_classification:
+                confidence = 1
+                label = len(self.categories) - 1
+            track_existent.classification.update(confidence, self.categories, int(label))
             track_existent.kinematic.update(detected_bbox, self.frame_width, self.frame_height, self.camera,
-                                            self.calibration, track_existent.classification.category.avg_height)
+                                            track_existent.classification.category.avg_height)
 
             track_existent.kinematic.current_bbox = detected_bbox
             self.tracks_list[track_existent.uuid] = track_existent

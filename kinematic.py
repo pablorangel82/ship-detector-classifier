@@ -107,7 +107,7 @@ class Kinematic:
         vy = self.kf.x[3]
         return x,y,vx,vy
 
-    def update(self, bbox, frame_width, frame_height, camera, calibration, real_height):
+    def update(self, bbox, frame_width, frame_height, camera, real_height):
         self.kf.Q = Kinematic.Q
         self.lost = False
         timestamp_now = datetime.now()
@@ -118,6 +118,8 @@ class Kinematic:
         self.kf.F[0][1]= Kinematic.dt
         self.kf.F[2][3]= Kinematic.dt
 
+
+
         distance = ((real_height * camera.focal_length) / self.get_pixel_coordinates()[3])
         distance = (distance / 1000)  # mm to m
         distance += distance * camera.zoom
@@ -126,7 +128,7 @@ class Kinematic:
                                                               frame_height)
         new_bearing = camera.bearing + bearing_pixel
         if new_bearing > 360:
-            new_bearing = 360 - new_bearing
+            new_bearing = new_bearing - 360
         new_distance = distance
 
         self.bearing = new_bearing

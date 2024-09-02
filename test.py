@@ -22,12 +22,3 @@ from track import Track
 # print(bearing, distance)
 # bearing, distance = kinematic.Kinematic.geo_to_polar(-22.912759833, -43.1582615, -22.89750771788674, -43.15667996000589)
 # print(bearing, distance)
-
-p = -0.5
-bearing = 0
-if p > 0:
-    bearing = p * 180
-else:
-    bearing = 360 - (180 * (p * -1))
-
-print("Bearing: " + str(bearing))

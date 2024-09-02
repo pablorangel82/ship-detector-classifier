@@ -4,23 +4,21 @@ class Classification:
 
     def __init__(self, category):
         self.category = category
-        self.category_index = 5
+        self.category_index = 6
         self.timestamp = datetime.now()
-        self.classification_confidence = 0
-        self.detection_confidence = 0
-        self.votes = [0, 0, 0, 0, 0, 0]
+        self.confidence = 0
+        self.votes = [0, 0, 0, 0, 0, 0, 0]
 
-    def update(self, detection_confidence, classification_confidence, categories, category_index):
+    def update(self, confidence, categories, category_index):
         self.votes[category_index] += 1
         most_voted = 0
         for i in range(len(self.votes)):
             if self.votes[i] > self.votes[most_voted]:
                 most_voted = i
         self.category = categories[most_voted]
-        self.detection_confidence = detection_confidence
         if category_index == most_voted:
-            if classification_confidence > self.classification_confidence:
-                self.classification_confidence = classification_confidence
+            if confidence > self.confidence:
+                self.confidence = confidence
         self.category_index = most_voted
         self.timestamp = datetime.now()
 

@@ -39,8 +39,6 @@ class Camera:
         self.pan_min = camera_data['pan_min']
         self.pan_max = camera_data['pan_max']
         self.frame_rate = camera_data['frame_rate']
-        self.resolution_width = camera_data['resolution_width']
-        self.resolution_height = camera_data['resolution_height']
 
     def next_frame(self):
         (ok, frame) = self.video_stream.stream.stream.read()
