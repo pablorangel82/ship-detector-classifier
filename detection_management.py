@@ -90,25 +90,21 @@ class DetectionManagement(Thread):
     def detect_and_classify(self, raw_img):
         self.frame_height, self.frame_width, channels = raw_img.shape
         detection_results = self.net_classifier.predict([raw_img],verbose=True)
-
         for result in detection_results:
-            detection_count = result.boxes.shape[0]
-            for i in range(detection_count):
-                cls = int(result.boxes.cls[i].item())
-                name = result.names[cls]
-                confidence = float(result.boxes.conf[i].item())
+            for box in result.boxes:
+                name = max(box.cls.tolist())
+                confidence = float(box.conf)
                 if confidence < self.calibration.threshold_detection:
                     continue
-                bounding_box = result.boxes.xyxy[i].tolist()
+                bounding_box = box.xyxy[0]
                 x = int(bounding_box[0])
                 y = int(bounding_box[1])
                 width = int(bounding_box[2] - x)
                 height = int(bounding_box[3] - y)
                 bbox = [x, y, width, height]
-                self.estimate(confidence, cls, bbox)
+                self.estimate(confidence, name, bbox)
 
     def estimate(self, confidence, label, detected_bbox):
-
         track_existent = None
         with self.control_access_track_list:
             for track in self.tracks_list.values():
