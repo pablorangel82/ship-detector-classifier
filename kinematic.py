@@ -7,8 +7,9 @@ from filterpy.common import Q_discrete_white_noise
 from GenericList import GenericList
 from scipy.linalg import block_diag
 
+
 class Kinematic:
-    NUMBER_OF_SAMPLES = 1
+    NUMBER_OF_SAMPLES = 5
     dt = 1
     Q = None
 
@@ -31,8 +32,8 @@ class Kinematic:
                          [0., 0., 1., Kinematic.dt],
                          [0., 0., 0., 1.]])
         kf.H = np.array([[1., 0., 0., 0.],
-                        [0., 0., 1., 0.]])
-        P = (10000.,10000,10000,10000)
+                         [0., 0., 1., 0.]])
+        P = (10000., 10000, 10000, 10000)
         kf.P *= np.diag(P)
         kf.R = 1
         kf.Q = Kinematic.Q
@@ -96,33 +97,28 @@ class Kinematic:
         course, speed = Kinematic.xy_to_polar(0, 0, vx, vy)
         return speed / delta_t, course
 
-    def apply_kalman_filter(self,x, y):
+    def apply_kalman_filter(self, x, y):
         if self.kf.x is None:
             self.kf.x = np.array([1., 0., 1., 0.])
         self.kf.predict()
-        self.kf.update([[x,y]])
+        self.kf.update([[x, y]])
         x = self.kf.x[0]
         y = self.kf.x[2]
         vx = self.kf.x[1]
         vy = self.kf.x[3]
-        return x,y,vx,vy
+        return x, y, vx, vy
 
     def update(self, bbox, frame_width, frame_height, camera, real_height):
         self.kf.Q = Kinematic.Q
         self.lost = False
         timestamp_now = datetime.now()
-        bbox_added = False
-        if self.pixel_positions.get_current_value() is None:
-            self.pixel_positions.add_value(bbox)
-            bbox_added = True
-        self.kf.F[0][1]= Kinematic.dt
-        self.kf.F[2][3]= Kinematic.dt
-
-
+        self.pixel_positions.add_value(bbox)
+        self.kf.F[0][1] = Kinematic.dt
+        self.kf.F[2][3] = Kinematic.dt
 
         distance = ((real_height * camera.focal_length) / self.get_pixel_coordinates()[3])
         distance = (distance / 1000)  # mm to m
-        distance += distance * camera.zoom
+       # distance += distance * camera.zoom
         new_center_pixel_x = bbox[0] + int(bbox[2] / 2)
         bearing_pixel, distance_pixel = Kinematic.xy_to_polar(0, 0, new_center_pixel_x - (frame_width / 2),
                                                               frame_height)
@@ -136,15 +132,13 @@ class Kinematic:
         new_position_lat, new_position_lon = Kinematic.polar_to_geo(camera.lat, camera.lon, self.bearing,
                                                                     self.distance_from_camera)
         new_position_x, new_position_y = Kinematic.geo_to_xy(new_position_lat, new_position_lon)
-        x,y, vx, vy = self.apply_kalman_filter(new_position_x, new_position_y)
+        x, y, vx, vy = self.apply_kalman_filter(new_position_x, new_position_y)
         self.velocities.add_value([vx * 1.94384, vy * 1.94384])
         self.timestamp = timestamp_now
         self.geo_positions.add_value([new_position_x, new_position_y])
-        if bbox_added is not True:
-            self.pixel_positions.add_value(bbox)
 
     def get_pixel_coordinates(self):
-        return self.pixel_positions.get_current_value()
+        return self.get_avg_bbox()
 
     def get_pixel_center_position(self):
         bbox = self.get_pixel_coordinates()
@@ -154,7 +148,7 @@ class Kinematic:
 
     def get_current_kinematic(self):
         lat = lon = speed = course = bbox = None
-        bbox = self.pixel_positions.get_current_value()
+        bbox = self.get_pixel_coordinates()
         xy = self.geo_positions.get_current_value()
         if xy is not None:
             lat, lon = Kinematic.xy_to_geo(xy[0], xy[1])
@@ -175,4 +169,17 @@ class Kinematic:
     def update_noise_function(dt):
         Kinematic.dt = dt
         q = Q_discrete_white_noise(dim=2, dt=Kinematic.dt, var=0.00013)
-        Kinematic.Q = block_diag(q,q)
+        Kinematic.Q = block_diag(q, q)
+
+    def get_avg_bbox(self):
+        avg_width = 0
+        avg_height = 0
+        for index in self.pixel_positions.values:
+            value = self.pixel_positions.values[index]
+            avg_width += value[2]
+            avg_height += value[3]
+        avg_width /= len(self.pixel_positions.values)
+        avg_height /= len(self.pixel_positions.values)
+        x = self.pixel_positions.get_current_value()[0]
+        y = self.pixel_positions.get_current_value()[1]
+        return x, y, avg_width, avg_height

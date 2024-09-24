@@ -24,4 +24,4 @@ class Classification:
 
     def to_string(self):
         # return (self.category.description).upper() + ' (' + str(round(self.classification_confidence * 100)) + ')'
-        return (self.category.description).upper()
+        return (self.category.description).upper() + ' - ' + str(round(self.confidence*100,2)) + '%'

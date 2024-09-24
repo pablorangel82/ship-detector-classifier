@@ -18,9 +18,9 @@
         "real_distance" : 1370000,
         "alpha" : 0,
         "beta" : 0.2,
-        "threshold_detection" : 0.8,
-        "threshold_classification" : 0.6,
-        "zoom": 1.8,
+        "threshold_detection" : 0.5,
+        "threshold_classification" : 0.8,
+        "zoom": 0.4,
         "detection_interval": 1,
         "classification_interval": 3
     }

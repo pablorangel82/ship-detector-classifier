@@ -5,3 +5,4 @@ filterpy
 imutils
 flask
 opencv-python
+ultralytics

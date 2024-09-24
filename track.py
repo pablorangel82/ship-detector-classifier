@@ -51,6 +51,6 @@ class Track:
                 "speed": speed,
                 "course": course,
                 "lost": lost,
-                "classification": classification
+                "classification": classification,
             }
         return obj
