@@ -1,4 +1,7 @@
 import copy
+
+import cv2
+
 import filters
 import kinematic
 from category import Category
@@ -89,7 +92,8 @@ class DetectionManagement(Thread):
 
     def detect_and_classify(self, raw_img):
         self.frame_height, self.frame_width, channels = raw_img.shape
-        detection_results = self.net_classifier.predict([raw_img],verbose=True)
+        img = cv2.resize(raw_img, (640, 384), cv2.INTER_AREA)
+        detection_results = self.net_classifier.predict([img],verbose=True)
         for result in detection_results:
             for box in result.boxes:
                 name = max(box.cls.tolist())
@@ -97,10 +101,10 @@ class DetectionManagement(Thread):
                 if confidence < self.calibration.threshold_detection:
                     continue
                 bounding_box = box.xyxy[0]
-                x = int(bounding_box[0])
-                y = int(bounding_box[1])
-                width = int(bounding_box[2] - x)
-                height = int(bounding_box[3] - y)
+                x = int((bounding_box[0] * self.frame_width) / 640)
+                y = int((bounding_box[1] * self.frame_height) / 384)
+                width = int((bounding_box[2]* self.frame_width) / 640) - x
+                height = int((bounding_box[3] * self.frame_height) / 384) - y
                 bbox = [x, y, width, height]
                 self.estimate(confidence, name, bbox)
 

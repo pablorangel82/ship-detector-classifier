@@ -30,15 +30,17 @@ class Track:
         lost = 'false'
         if self.kinematic.lost:
             lost = 'true'
-        lat, lon, speed, course, bbox = self.kinematic.get_current_kinematic()
+        lat, lon, speed, course, bearing, bbox = self.kinematic.get_current_kinematic()
         dist = round(self.kinematic.distance_from_camera / 1852, 2)
         if lat and lon is not None:
+
             if speed is not None:
                 speed = float(speed)
                 course =float(course)
             else:
-                speed = -1
-                course = -1
+                speed = None
+                course = None
+
             obj = {
                 "name" : self.get_name(),
                 "lat" : lat,
@@ -50,7 +52,9 @@ class Track:
                 "height": float(bbox[3]),
                 "speed": speed,
                 "course": course,
+                "bearing": bearing,
                 "lost": lost,
                 "classification": classification,
+                "category":self.classification.category.id
             }
         return obj

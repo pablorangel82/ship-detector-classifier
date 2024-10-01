@@ -118,7 +118,7 @@ class Kinematic:
 
         distance = ((real_height * camera.focal_length) / self.get_pixel_coordinates()[3])
         distance = (distance / 1000)  # mm to m
-       # distance += distance * camera.zoom
+        distance += distance * camera.zoom
         new_center_pixel_x = bbox[0] + int(bbox[2] / 2)
         bearing_pixel, distance_pixel = Kinematic.xy_to_polar(0, 0, new_center_pixel_x - (frame_width / 2),
                                                               frame_height)
@@ -155,7 +155,7 @@ class Kinematic:
         vx_vy = self.velocities.get_current_value()
         if vx_vy is not None:
             speed, course = Kinematic.calculate_speed_and_course(vx_vy[0], vx_vy[1], 1)
-        return lat, lon, speed, course, bbox
+        return lat, lon, speed, course, self.bearing, bbox
 
     def to_string(self):
         string = ''
@@ -168,7 +168,7 @@ class Kinematic:
     @staticmethod
     def update_noise_function(dt):
         Kinematic.dt = dt
-        q = Q_discrete_white_noise(dim=2, dt=Kinematic.dt, var=0.00013)
+        q = Q_discrete_white_noise(dim=2, dt=Kinematic.dt, var=0.013)
         Kinematic.Q = block_diag(q, q)
 
     def get_avg_bbox(self):

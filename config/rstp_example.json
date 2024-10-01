@@ -1,6 +1,6 @@
 {
     "camera" : {
-        "address": "samples/barca.mp4",
+        "address": "samples/test2.mp4",
         "latitude": -22.912759833,
         "longitude": -43.1582615,
         "standard_bearing": 336,
@@ -16,10 +16,8 @@
         "pixel_height" : 136,
         "real_height" : 5500,
         "real_distance" : 1370000,
-        "alpha" : 0,
-        "beta" : 0.2,
         "threshold_detection" : 0.5,
-        "threshold_classification" : 0.8,
+        "threshold_classification" : 0.7,
         "zoom": 0.4,
         "detection_interval": 1,
         "classification_interval": 3

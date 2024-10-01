@@ -18,14 +18,10 @@
         "pixel_height" : 136,
         "real_height" : 5500,
         "real_distance" : 1370000,
-        "alpha" : 1,
-        "beta" : 0.2,
-        "threshold_detection" : 0.42,
-        "threshold_detection_vessel" : 0.9,
-        "threshold_classification_vessel" : 0.6,
+        "threshold_detection" : 0.5,
+        "threshold_classification" : 0.75,
         "zoom": 0.4,
         "detection_interval": 1,
         "classification_interval": 3
-
     }
 }
