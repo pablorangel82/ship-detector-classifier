@@ -1,11 +1,9 @@
 class Calibration:
 
     def __init__(self, calibration_data):
-        self.pixel_height = calibration_data['pixel_height']
-        self.real_height = calibration_data ['real_height']
-        self.real_distance = calibration_data['real_distance']
-        self.threshold_detection = calibration_data['threshold_detection']
+        self.threshold_confidence = calibration_data['threshold_confidence']
         self.threshold_classification = calibration_data['threshold_classification']
-        self.zoom = calibration_data['zoom']
-        self.detection_interval = calibration_data['detection_interval']
-        self.classification_interval = calibration_data['classification_interval']
+        self.threshold_intersection = calibration_data['threshold_intersection']
+        self.train_image_width = calibration_data['train_img_width']
+        self.train_image_height = calibration_data['train_img_height']
+        self.resize = calibration_data['resize']

@@ -1,3 +1,4 @@
-/classifier/dataset/
-/classifier/dataset_aug/
-/classifier/runs/
+samples/
+__pycache__/
+.idea/
+ref.txt

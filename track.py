@@ -2,15 +2,16 @@ import math
 import uuid
 import classification
 import kinematic
-import json
+import category
 
 
 class Track:
-    def __init__(self, category):
+    def __init__(self):
         self.uuid = 'UUID-EN-CAMERA-' + str(uuid.uuid4())
         self.kinematic = kinematic.Kinematic()
-        self.classification = classification.Classification(category)
+        self.classification = classification.Classification()
         self.name = None
+        
 
     def to_string(self):
         string = '\nId: ' + self.get_name() + '\n Classification: ' + self.classification.to_string() + '\n Kinematic: ' + self.kinematic.to_string()
@@ -30,17 +31,20 @@ class Track:
         lost = 'false'
         if self.kinematic.lost:
             lost = 'true'
-        lat, lon, speed, course, bearing, bbox = self.kinematic.get_current_kinematic()
-        dist = round(self.kinematic.distance_from_camera / 1852, 2)
+        lat, lon, speed, course, bearing, dist, bbox = self.kinematic.get_current_kinematic()
         if lat and lon is not None:
-
-            if speed is not None:
+            distance_realibility = 'false'
+            unknown_id = (category.Category.CATEGORIES[len(category.Category.CATEGORIES) -1]).id
+            if self.classification.category.id != unknown_id and speed is not None:
+                distance_realibility = 'true'
                 speed = float(speed)
                 course =float(course)
+                dist = round(self.kinematic.distance_from_camera / 1852, 2)
             else:
                 speed = None
                 course = None
-
+                dist = None
+            
             obj = {
                 "name" : self.get_name(),
                 "lat" : lat,
@@ -55,6 +59,6 @@ class Track:
                 "bearing": bearing,
                 "lost": lost,
                 "classification": classification,
-                "category":self.classification.category.id
+                "distance_realibility":distance_realibility
             }
         return obj

@@ -1,31 +1,13 @@
 from imutils.video import VideoStream
-import datetime
+import math
 
 class Camera:
 
     def __init__(self, location, calibration):
-        self.estimation_interval = 10
-        self.time_of_first_read = datetime.datetime.now()
-        self.frames_read = 0
-        self.address = None
-        self.lat = None
-        self.lon = None
-        self.ref_bearing = None
-        self.zoom_min = None
-        self.zoom_max = None
-        self.tilt_min = None
-        self.tilt_max = None
-        self.pan_min = None
-        self.pan_max = None
-        self.frame_rate = None
-        self.resolution_width = None
-        self.resolution_height = None
-        self.zoom = 0
-        self.bearing = 6
         self.load_config(location)
-        self.focal_length = calibration.zoom * ( (calibration.pixel_height * calibration.real_distance) / calibration.real_height)
+        self.set_ptz(0.25,0,0.8)
         self.video_stream = VideoStream(self.address, frame_rate=self.frame_rate,
-                                        resolution=(self.resolution_width, self.resolution_height))
+                                        resolution=(self.width_resolution, self.height_resolution))
 
     def load_config(self, camera_data):
         self.address = camera_data['address']
@@ -34,10 +16,13 @@ class Camera:
         self.ref_bearing = camera_data['standard_bearing']
         self.zoom_min = camera_data['zoom_min']
         self.zoom_max = camera_data['zoom_max']
-        self.tilt_min = camera_data['tilt_min']
-        self.tilt_max = camera_data['tilt_max']
-        self.pan_min = camera_data['pan_min']
-        self.pan_max = camera_data['pan_max']
+        self.height_resolution = camera_data['height_resolution']
+        self.width_resolution = camera_data['width_resolution']
+        self.ratio = self.height_resolution / self.width_resolution
+        self.hfov_max = math.radians(camera_data['hfov_max'])
+        self.hfov_min = math.radians(camera_data['hfov_min'])
+        self.tilt_range = camera_data['tilt_range']
+        self.pan_range = camera_data['pan_range']
         self.frame_rate = camera_data['frame_rate']
 
     def next_frame(self):
@@ -45,15 +30,20 @@ class Camera:
         return frame
 
     def set_ptz(self,pan, tilt, zoom):
+        self.zoom = zoom
         bearing = 0
         if pan > 0:
-            bearing = pan * 180
+            bearing = pan * (self.pan_range / 2)
         else:
-            bearing = 360 - (180 * (pan * -1))
+            bearing = self.pan_range - ((self.pan_range/2)) * (pan * -1)
         bearing = bearing + self.ref_bearing
         if bearing > 360:
             bearing = bearing - 360
         self.bearing = bearing
-        self.zoom = zoom
-
-
+        self.calculate_new_focal_length(zoom)
+    
+    def calculate_new_focal_length(self,zoom):
+        self.hfov = self.hfov_max - ( (self.hfov_max - self.hfov_min) * zoom)
+        self.vfov = 2 * (math.atan(self.ratio * math.tan(self.hfov/2)))
+        self.focal_length = self.height_resolution / (2 * math.tan(self.vfov/2)) 
+        
