@@ -1,0 +1,9 @@
+scikit-learn
+pyproj
+pillow
+filterpy
+imutils
+opencv-python
+ultralytics
+beautifulsoup4
+lxml
