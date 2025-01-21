@@ -1,8 +1,0 @@
-scikit-learn
-pyproj
-pillow
-filterpy
-imutils
-flask
-opencv-python
-ultralytics
