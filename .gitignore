@@ -1,3 +1,3 @@
-report/samples/
-resources/__pycache__/
+scripts/core/samples/
+scripts/evaluation/trials/3_0/
 .idea/

@@ -1,0 +1,27 @@
+0,Container Ship, 21890, 3148, 3101
+1,Bulk Carrier, 31954, 4661, 4403
+2,Passenger Ship, 7149, 1045, 976
+3,Ro-ro Passenger Ship, 9997, 1476, 1352
+4,Ro-ro Cargo Ship, 5582, 817, 756
+5,Tug, 18414, 2698, 2435
+6,Vehicles Carrier, 6476, 936, 904
+7,Reefer, 6741, 1008, 871
+8,Yacht, 6411, 983, 800
+9,Sailing Vessel, 850, 123, 110
+10,Heavy Load Carrier, 769, 115, 99
+11,Wood Chips Carrier, 1151, 168, 151
+12,Livestock Carrier, 1321, 190, 155
+13,Fire Fighting Vessel, 945, 136, 112
+14,Patrol Vessel, 1288, 182, 150
+15,Platform, 1467, 209, 148
+16,Standby Safety Vessel, 1348, 198, 170
+17,Combat Vessel, 263, 38, 37
+18,Training Ship, 712, 107, 81
+19,Icebreaker, 504, 71, 66
+20,Replenishment Vessel, 558, 81, 71
+21,Tanker, 26959, 3922, 3673
+22,Fishing Vessel, 15852, 2383, 1809
+23,Supply Vessel, 9970, 1483, 1170
+24,Carrier Floating, 2452, 364, 280
+25,Dredger, 2789, 405, 340
+26,Unknown, 0, 0, 0

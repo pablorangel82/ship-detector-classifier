@@ -1,21 +1,14 @@
 # Environment Preparation
 
-## With CUDA Support
-
-- Install Python 3.10.11 and allow the installer to automatically set the "Python PATH."
-- Update NVIDIA® GPU drivers to version 450.80.02 or higher.
-- Execute the `create-env-gpu` script using your operating system shell.
-
-## Without CUDA Support
-
-- Install Python 3.10.11 and allow the installer to automatically set the "Python PATH."
-- Execute the `create-env-cpu` script using your operating system shell.
+- Install Python 3.10.11 and allow the installer to automatically set the "Python PATH.";
+- Update NVIDIA® GPU drivers to version 450.80.02 or higher if you wnat GPU support;
+- Execute the `create-env` script using your operating system shell.
 
 ---
 
 # Downloading and Building the Dataset
 
-- Run the Python script `_run_dataset.py_.` This process includes three steps: downloading, labeling, and viewing. To skip any of these steps, simply comment out the corresponding function call in `_run_dataset.py_.`  
+- Run the Python script `_run_preparation.py_.` This process includes three steps: downloading, labeling, and viewing. To skip any of these steps, simply comment out the corresponding function call in `_run_preparation.py_.`  
 - The script `dataset_config.py` contains all parameters. You can modify settings such as the download folder, dataset folder, and labeling parameters.  
 - **Note**: Downloading the dataset requires significant storage space (approximately 1TB). To save space, you can automatically resize photos by setting the `_auto_resize_` parameter to `True` when calling the `download` function.  
 - It is recommended to set the `_start_again_` parameter to `False.` If set to `True,` all previously downloaded data will be discarded.  
@@ -26,14 +19,15 @@
 
 # Customizing Video Parameters, Running the Model, and Viewing Results
 
-- Ensure you have a JSON file containing calibration and camera parameters located in the `_resources_` folder. The filename must be specified in the `run_model.py` script.  
-- The `DetectionManagement` constructor requires the name of the JSON file containing camera and model parameters. An example JSON file, `_rstp_example.json_,` is provided for reference.  
+- Ensure you have a JSON file containing calibration and camera parameters located in the `_config_` folder. The filename must be specified in the `run_model.py` script.  
+- The `DCM` constructor requires the name of the JSON file containing camera and model parameters. An example JSON file, `_setup.json_,` is provided for reference.  
 
 ### Example JSON Structure  
 
 ```json
 {
     "camera": {
+        "id":"EN",
         "address": "../../report/samples/barca.mp4",
         "latitude": -22.912759833,
         "longitude": -43.1582615,
@@ -61,6 +55,7 @@
 
 ### Key Parameters  
 
+- **`id`**: The identification of video streaming. The generated tracks will have their IDs based on this string. 
 - **`address`**: The RTSP address or the local file path containing the video to be used by the model.  
 - **`latitude` and `longitude`**: The geographic coordinates of the stationary camera.  
 - **`standard_bearing`**: The default bearing of the camera installation, based on the polar coordinate system. This value is used to adjust vessel bearing estimations.  
@@ -71,4 +66,4 @@
 - **`train_img_width` and `train_img_height`**: The dimensions of the images used to train the model.  
 - **`resize`**: Indicates whether to resize images for detection and classification.
 
-The `DetectionManagement` constructor also requires the language of the Python script containing translated vessel categories. All files must follow the naming convention `_category_<language>.py_.`
+The `DCM` constructor also requires the language of the Python script containing translated vessel categories. All files must follow the naming convention `_category_<language>.py_.`

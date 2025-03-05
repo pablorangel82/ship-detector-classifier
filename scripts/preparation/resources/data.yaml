@@ -1,0 +1,11 @@
+train: train/
+val: val/
+test: test/
+
+nc: 26
+names: [
+  "Container Ships", "Bulk Carriers", "Passengers Ships", "Ro-ro Passenger Ships", "Ro-ro Cargo Ships", "Tugs", "Vehicles Carriers", 
+  "Reefers", "Yachts", "Sailing Vessels", "Heavy Load Carriers", "Wood Chips Carriers" , "Livestock Carriers" ,
+  "Fire Fighting Vessels", "Patrol Vessels","Platforms","Standby Safety Vessels","Combat Vessels","Training Ships",
+  "Icebreakers", "Replenishment Vessels","Tankers","Fishing Vessels","Supply Vessels","Carrier Floating","Dredgers"
+ ]
