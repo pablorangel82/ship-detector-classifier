@@ -11,6 +11,7 @@ color_pin = (67, 135, 226)
 min_rect_width = 300
 font_size = 12
 font_type = ImageFont.truetype("resources/arial.ttf", font_size)
+show_bb_active_track = True
 
 
 def deg_to_dms(deg, coord_type='lat'):
@@ -45,73 +46,68 @@ def view (frame, tracks):
     image = frame
     text_values = []
     for track in tracks.values():
-        lat, lon, speed, course, bearing, dist, bbox = track.kinematic.get_current_kinematic()
-        if lat and lon is not None:
-            distance_realibility = False
-            unknown_id = (Category.CATEGORIES[len(Category.CATEGORIES) -1]).id
-            if track.classification.category.id != unknown_id and speed is not None:
-                distance_realibility = True
-                speed = float(speed)
-                course =float(course)
-                dist = round(track.kinematic.distance_from_camera / 1852, 2)
-            else:
-                speed = None
-                course = None
-                dist = None
-            px= int(bbox[0])
-            py= int(bbox[1])
-            w= int(bbox[2])
-            h= int(bbox[3])
-            
-            if track.kinematic.lost:
-                image = cv2.rectangle(image, (px,py), (px+w,py+h), color_rect_lost,1)
-            else:
-                text = track.classification.to_string()
-                xmin = int(px + (w/4))
-                ymin = int(py - (font_size * 4))
-                rect_width = (font_size * len(text) * 0.6)+2
-                if rect_width < min_rect_width:
-                    rect_width = min_rect_width 
-                xmax = int(px + rect_width + (w/4))
-                ymax = int(py) 
-                xcenter_src = int(xmin + (rect_width/2))
-                xcenter_dst = int(px + (w/2))
-                ycenter = int(py + (h/2))
-                image = cv2.rectangle(image, (xmin,ymin), (xmax,ymax), color_rect_active,-1)
-                image = cv2.line(image, (xcenter_src,ymax),(xcenter_dst,ycenter),color_rect_active,2 )
-                image = cv2.circle(image,(xcenter_dst,ycenter),10,color_pin,-1)
-                ymin = int(py-(font_size*4))
-                text_values.append([text,xmin,ymin,color_text_title])
-                if distance_realibility == False:
-                    ymin = int(py - (font_size * 2))
-                    bearing = round(bearing)
-                    text = 'Bearing: ' + str(bearing) + ' º';  
-                    text_values.append([text,xmin,ymin,color_text_body])
+        unknown_id = (Category.CATEGORIES[len(Category.CATEGORIES) -1]).id
+        lat, lon, speed, course, bearing, dist, bbox = track.get_current_kinematic()
+        bearing = round(bearing,2)
+        if track.classification.category.id != unknown_id:
+            dist = round(dist / 1000, 2) #m->km
+            speed = round(float(speed))
+            course =round(float(course))
+            if speed < 2:
+                if speed == 0:
+                    speed = '-'
+                    course = '-'
                 else:
-                    if speed < 2:
-                        speed = 0
-                        course = '-'
-                    else:
-                        if speed > 40:
-                            speed='-'
-                            course='-'
-                        else:
-                            speed = round(speed)
-                            course = round(course)
-                    error = ''
-                    if track.kinematic.error is not None:
-                        error_position, error_velocity = track.kinematic.error
-                        error = 'EP: ' + str(error_position) + ' EV: ' + str(error_velocity)
-                    
-                    text = error
-                    ymin = int(py - (font_size * 3))
-                    text_values.append([text,xmin,ymin,color_text_body])
-                    text = 'Position: ' + deg_to_dms(lat,'lat') + '    ' + deg_to_dms (lon,'lon')
-                    ymin = int(py - (font_size * 2))
-                    text_values.append([text,xmin,ymin,color_text_body])
-                    ymin = int(py - (font_size * 1))
-                    text = 'Speed: ' + str(speed) + " KT" + "   Course: " + str(course) + " º" 
-                    text_values.append([text,xmin,ymin,color_text_body])
+                    speed = 0
+                    course = '-'
+            else:
+                if speed > 40:
+                    speed='-'
+                    course='-'
+            text_velociy = 'Speed: ' + str(speed) + " KT" + "   Course: " + str(course) + " º" 
+            text_geopos = 'Geo Position: ' + deg_to_dms(lat,'lat') + '    ' + deg_to_dms (lon,'lon')
+            text_polar = 'Bearing: ' + str(bearing) + ' º' + '    Distance from camera: ' + str(dist) + ' km'
+        else:
+            text_velociy = None 
+            text_geopos = None 
+            text_polar = 'Bearing: ' + str(bearing) + ' º' + '    Distance from camera:-  km'
+
+            
+        px= int(bbox[0])
+        py= int(bbox[1])
+        w= int(bbox[2])
+        h= int(bbox[3])
+        
+        if track.lost:
+            image = cv2.rectangle(image, (px,py), (px+w,py+h), color_rect_lost,1)
+        else:
+            if show_bb_active_track:
+                image = cv2.rectangle(image, (px,py), (px+w,py+h), color_rect_active,1)
+            text_title = track.classification.to_string()
+            xmin = int(px + (w/4))
+            ymin = int(py - (font_size * 5))
+            rect_width = (font_size * len(text_title) * 0.6)+2
+            if rect_width < min_rect_width:
+                rect_width = min_rect_width 
+            xmax = int(px + rect_width + (w/4))
+            ymax = int(py) 
+            xcenter_src = int(xmin + (rect_width/2))
+            xcenter_dst = int(px + (w/2))
+            ycenter = int(py + (h/2))
+            image = cv2.rectangle(image, (xmin,ymin), (xmax,ymax), color_rect_active,-1)
+            image = cv2.line(image, (xcenter_src,ymax),(xcenter_dst,ycenter),color_rect_active,2 )
+            image = cv2.circle(image,(xcenter_dst,ycenter),10,color_pin,-1)
+            ymin = int(py-(font_size*5))
+            text_values.append([text_title,xmin,ymin,color_text_title])
+            ymin = int(py - (font_size * 3))
+            text_values.append([text_polar,xmin,ymin,color_text_body])
+            if text_geopos is not None:
+                ymin = int(py - (font_size * 2))
+                text_values.append([text_geopos,xmin,ymin,color_text_body])
+            if text_velociy is not None:
+                ymin = int(py - (font_size * 1))
+                text_values.append([text_velociy,xmin,ymin,color_text_body])
+
     image = draw_texts(image, text_values)                
     cv2.imshow("Ship Detector Classifier",image)
     

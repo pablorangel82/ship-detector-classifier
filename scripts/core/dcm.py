@@ -6,13 +6,15 @@ import time
 import torch
 from ultralytics import YOLO
 import os
+import math
 from threading import Thread, Semaphore
 from core.category import Category
 from core.calibration import Calibration
 from core.camera import Camera
-from core.kinematic import Kinematic
 from core.track import Track
 from core.listener import Listener
+from core.monocular_vision import MonocularVision
+from core.category import Category
 
 class DCM(Thread):
 
@@ -20,7 +22,6 @@ class DCM(Thread):
         Thread.__init__(self)
         self.listener = None
         self.tracks_list = {}
-        Kinematic.update_noise_function()
         self.control_access_track_list = Semaphore(1)
         json_file = open(config_path+'.json')
         config_data = json.load(json_file)
@@ -100,12 +101,13 @@ class DCM(Thread):
         return iou
 
     def tracking(self, confidence, label, detected_bbox):
-        track_existent = None
+        track_candidate = None
         best_iou = 0
-        action = Listener.EVENT_CREATE
+        action = Listener.EVENT_UPDATE
+        category = Category.CATEGORIES [label] 
         with self.control_access_track_list:
             for track in self.tracks_list.values():
-                old_bbox = track.kinematic.pixel_positions.get_current_value()
+                old_bbox = track.bbox
                 old_x1 = old_bbox[0]
                 old_y1 = old_bbox[1]
                 old_x2 = old_bbox[0] + int(old_bbox[2])
@@ -120,38 +122,35 @@ class DCM(Thread):
                 bb2 = (new_x1, new_y1, new_x2, new_y2)
                 
                 iou = self.calculate_iou(bb1,bb2)
-                if iou > self.calibration.threshold_intersection_tracking:    
-                    if track_existent is None:
-                        track_existent = track
-                        best_iou = iou
-                    else:
-                        action = Listener.EVENT_UPDATE
-                        if iou > best_iou:
-                            track_existent = track
-                            best_iou = iou
-            if track_existent is None:
-                track_existent = Track(self.camera.id)
+                if iou > best_iou:
+                    track_candidate = track
+                    best_iou = iou
+
+            if best_iou < self.calibration.threshold_intersection_tracking:
+                track_candidate = Track(self.camera.id)
+                action = Listener.EVENT_CREATE
+               
             if confidence < self.calibration.threshold_classification:
                 confidence = 1
                 label = len(Category.CATEGORIES) - 1
-            track_existent.classification.update(confidence, int(label))
-            track_existent.kinematic.update(detected_bbox, self.camera,track_existent.classification.category.avg_air_draught)
-            self.tracks_list[track_existent.uuid] = track_existent
+
+            track_candidate.update(detected_bbox,self.camera,confidence, int(label))
+            self.tracks_list[track_candidate.uuid] = track_candidate
+
         if self.listener is not None:
-            self.listener.receive_evt(None,copy.deepcopy(track_existent), action)
-        return track_existent
+            self.listener.receive_evt(None,copy.deepcopy(track_candidate), action)
+        return track_candidate
 
     def run(self):
         while True:
             tracks_to_remove = []
             for track in self.tracks_list.values():
                 current_time = datetime.now()
-                k_diff = current_time - track.kinematic.timestamp
-                c_diff = current_time - track.classification.timestamp
-                if track.kinematic.lost is False and k_diff.seconds > 5 * Kinematic.dt and c_diff.seconds > 5 * Kinematic.dt:
-                    track.kinematic.lost = True
+                k_diff = current_time - track.get_timestamp()
+                if track.lost is False and k_diff.seconds > (5 * self.camera.interval_measured):
+                    track.lost = True
                     continue
-                if k_diff.seconds > 10 * Kinematic.dt and c_diff.seconds > 10 * Kinematic.dt:
+                if k_diff.seconds > (10 * self.camera.interval_measured):
                     tracks_to_remove.append(track)
 
             with self.control_access_track_list:

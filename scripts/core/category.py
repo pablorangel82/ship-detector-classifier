@@ -3,11 +3,15 @@ import importlib
 class Category():
     CATEGORIES = {}
 
-    def __init__(self, id, name, avg_air_draught, source_key):
+    def __init__(self, id, name, max_air_draught, min_air_draught, avg_air_draught, source_key):
         self.id = id
         self.name = name
+        self.max_air_draught = max_air_draught
+        self.min_air_draught = min_air_draught
         self.avg_air_draught = avg_air_draught
         self.source_key = source_key
+        self.pixel_height = 0
+        self.pixel_width = 0
    
     @staticmethod
     def load_categories(version, language):
@@ -16,6 +20,6 @@ class Category():
         categories_list = getattr(module, "categories", None)
         for json_obj in categories_list:
             cat = categories_list [json_obj]
-            category = Category(cat['id'], cat['name'], cat['avg_air_draught'], str(json_obj))
+            category = Category(cat['id'], cat['name'], cat['max_air_draught'], cat['min_air_draught'], cat['avg_air_draught'], str(json_obj))
             Category.CATEGORIES[category.id] = category
         return Category.CATEGORIES
