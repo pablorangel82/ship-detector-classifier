@@ -38,28 +38,24 @@ class KEMEvaluation (Listener):
     def evaluate(self, test_case, config_path, version):
         dcm = DCM(config_path, str(version), 'en')
         dcm.listener = self
-        gt = GroundTruth(-22.899988197673935, -43.160415545734416,67,8,355,0,26.5)
+        gt = GroundTruth(-22.899988197673935, -43.160415545734416,86,8,6,0,30)
         self.ground_truth[test_case].append(gt)
         logging.info ('Detection / Classification Task')
-        it = datetime.now()
         frames = 0
+        ellapsed = 0
         while True:
             frames +=1
             bearing = gt.bearing
             azimuth = gt.azimuth
             physical_zoom = gt.physical_zoom
             dcm.camera.set_to_track_position(bearing, azimuth,physical_zoom)
-            begin_detection = datetime.now()
             img_to_show,tracks_list = dcm.detect_estimate_and_classify()
-            end_detection = datetime.now()
             if img_to_show is None and tracks_list is None:
                 break
-            delta_t = (end_detection - begin_detection).seconds
             gt = copy.deepcopy(gt)
-            gt.estimate(delta_t)
+            ellapsed+=dcm.camera.interval_measured
+            gt.estimate(dcm.camera.interval_measured)
             self.ground_truth[test_case].append(gt)
-        ft = datetime.now()
-        ellapsed = (ft - it).seconds
         estimated_interval = 1/(frames/ellapsed)
         resolution_interval = (KEMEvaluation.RESOLUTION * estimated_interval) / self.interval
         logging.info ('Estimation Task for ' + str(ellapsed/60) + ' minutes video duration with estimated interval ' + str(estimated_interval))
@@ -75,16 +71,16 @@ class KEMEvaluation (Listener):
                         break
                     track = trajectory[j]
                     if self.initial_time is None:
-                        self.initial_time = track.kinematic.timestamp
+                        self.initial_time = track.utm.timestamp
                     gt = self.ground_truth[i][j]
-                    self.confusion_matrix[self.category][track.classification.category.id] += 1
+                    self.confusion_matrix[self.category][track.classification.elected[0].id] += 1
                     self.mcc_table [self.category][0]+=1
                     self.mcc_table [self.category][1]+=1
-                    if self.category == track.classification.category.id:
+                    if self.category == track.classification.elected[0].id:
                         self.mcc_table[self.category][2]+=1    
-                    x_track,y_track = track.kinematic.geo_positions.get_current_value()
-                    vx_track, vy_track = track.kinematic.velocities.get_current_value() 
-                    estimated_lat, estimated_lon, estimated_speed, estimated_course, self.bearing, self.distance_from_camera, bbox = track.kinematic.get_current_kinematic()
+                    x_track,y_track = track.utm.position
+                    vx_track, vy_track = track.utm.velocity 
+                    estimated_lat, estimated_lon, estimated_speed, estimated_course, self.bearing, self.distance_from_camera, bbox = track.get_current_kinematic()
                     samples+=1
                     window_error_position += math.sqrt(math.pow(x_track - gt.x,2) + math.pow(y_track - gt.y,2))
                     window_error_velocity += math.sqrt(math.pow(vx_track - gt.vx,2) + math.pow(vy_track - gt.vy,2))

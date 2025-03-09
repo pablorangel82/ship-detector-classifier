@@ -48,8 +48,9 @@ def view (frame, tracks):
     for track in tracks.values():
         unknown_id = (Category.CATEGORIES[len(Category.CATEGORIES) -1]).id
         lat, lon, speed, course, bearing, dist, bbox = track.get_current_kinematic()
+        elected_category = track.classification.elected
         bearing = round(bearing,2)
-        if track.classification.category.id != unknown_id:
+        if elected_category[0].id != unknown_id:
             dist = round(dist / 1000, 2) #m->km
             speed = round(float(speed))
             course =round(float(course))

@@ -104,7 +104,7 @@ class DCM(Thread):
         track_candidate = None
         best_iou = 0
         action = Listener.EVENT_UPDATE
-        category = Category.CATEGORIES [label] 
+
         with self.control_access_track_list:
             for track in self.tracks_list.values():
                 old_bbox = track.bbox

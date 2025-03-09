@@ -4,22 +4,21 @@ from core.category import Category
 class Classification:
 
     def __init__(self):
-        self.category = Category.CATEGORIES[len(Category.CATEGORIES) - 1]
         self.timestamp = datetime.now()
-        self.confidence = 0
-        self.votes=[]
-        for cat in Category.CATEGORIES:
-            self.votes.append(0)
+        self.categories=[]
+        self.elected = None
+        for i in range(len(Category.CATEGORIES)):
+            confidence_list = [None for element in range(10)]
+            self.categories.append((Category.CATEGORIES[i], 0, 0, None))
 
-    def update(self, confidence, category_index, pixel_width, pixel_height):
-        self.votes[category_index] += 1
-        most_voted = max(range(len(self.votes)),key=self.votes.__getitem__)
-        self.category = Category.CATEGORIES[most_voted]
-        if category_index == most_voted:
-            self.confidence = confidence
-            self.category.pixel_width = pixel_width
-            self.category.pixel_height = pixel_height
+    def update(self, confidence, category_index, bbox):
+        category = Category.CATEGORIES[category_index]
+        votes = self.categories [category_index] [1]
+        votes+=1
+        self.categories [category_index] = (category, votes, confidence, bbox)
+        if self.elected is None or votes > self.elected[1]:
+            self.elected = self.categories [category_index]
         self.timestamp = datetime.now()
-
+            
     def to_string(self):
-        return (self.category.name).upper() + ' - ' + str(round(self.confidence*100,2)) + '%'
+        return (self.elected[0].name).upper() + ' - ' + str(round(self.elected[2]*100,2)) + '%'

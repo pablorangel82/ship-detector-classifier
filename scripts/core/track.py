@@ -37,10 +37,12 @@ class Track:
         self.bbox_wh.update(w,h)
         self.bbox = [self.bbox_xy.position[0], self.bbox_xy.position[1], self.bbox_wh.position[0], self.bbox_wh.position[1]]
         
-        self.classification.update(confidence, category_index, self.bbox[2], self.bbox[3])
-        detected_bbox [2] = self.classification.category.pixel_width
-        detected_bbox [3] = self.classification.category.pixel_height
-        estimated_x, estimated_y, self.bearing, distance_from_camera = MonocularVision.monocular_vision_detection_method_2(camera, self.classification.category.max_air_draught,detected_bbox)
+        self.classification.update(confidence, category_index, self.bbox)
+        
+        air_draught = self.classification.elected[0].max_air_draught
+        detected_bbox [2] = self.classification.elected[3][2]
+        detected_bbox [3] = self.classification.elected[3][3]
+        estimated_x, estimated_y, self.bearing, distance_from_camera = MonocularVision.monocular_vision_detection_method_2(camera, air_draught, detected_bbox)
         self.utm.update(estimated_x, estimated_y)
         self.lat, self.lon = Converter.xy_to_geo(estimated_x, estimated_y)
         x_cam, y_cam = Converter.geo_to_xy(camera.lat, camera.lon)
@@ -83,7 +85,7 @@ class Track:
         if lat and lon is not None:
             distance_realibility = 'false'
             unknown_id = (core.category.Category.CATEGORIES[len(core.category.Category.CATEGORIES) -1]).id
-            if self.classification.category.id != unknown_id and speed is not None:
+            if self.classification.category.id != unknown_id:
                 distance_realibility = 'true'
                 speed = float(speed)
                 course =float(course)

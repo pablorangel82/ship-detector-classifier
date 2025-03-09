@@ -10,8 +10,6 @@ class Category():
         self.min_air_draught = min_air_draught
         self.avg_air_draught = avg_air_draught
         self.source_key = source_key
-        self.pixel_height = 0
-        self.pixel_width = 0
    
     @staticmethod
     def load_categories(version, language):
