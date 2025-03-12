@@ -42,7 +42,7 @@ def draw_texts(source_image,values):
     image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
     return image
 
-def view (frame, tracks):
+def view (frame, tracks, camera_bearing, ptz):
     image = frame
     text_values = []
     for track in tracks.values():
@@ -109,6 +109,14 @@ def view (frame, tracks):
                 ymin = int(py - (font_size * 1))
                 text_values.append([text_velociy,xmin,ymin,color_text_body])
 
-    image = draw_texts(image, text_values)                
+    text_camera_bearing =  str(round(camera_bearing,2))
+    text_ptz = 'P: ' + str(round(ptz[0],2)) + ' T: ' + str(round(ptz[1],2)) + ' Z: ' + str(round(ptz[2],2)) 
+
+    text_values.append(['Camera\'s bearing: ' + text_camera_bearing, 10, 10, color_text_body])
+    text_values.append(['Camera\'s PTZ: ' + text_ptz, 10, 30, color_text_body])
+    
+    image = draw_texts(image, text_values)
+    
+
     cv2.imshow("Ship Detector Classifier",image)
     

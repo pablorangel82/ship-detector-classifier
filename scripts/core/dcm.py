@@ -6,14 +6,12 @@ import time
 import torch
 from ultralytics import YOLO
 import os
-import math
 from threading import Thread, Semaphore
 from core.category import Category
 from core.calibration import Calibration
 from core.camera import Camera
 from core.track import Track
 from core.listener import Listener
-from core.monocular_vision import MonocularVision
 from core.category import Category
 
 class DCM(Thread):

@@ -7,7 +7,7 @@ class Converter():
     def polar_to_xy(ref_x, ref_y, bearing, distance):
         x = math.sin(math.radians(bearing)) * distance
         y = math.cos(math.radians(bearing)) * distance
-        if ref_x and ref_y is not None:
+        if ref_x is not None and ref_y is not None:
             x = x + ref_x
             y = y + ref_y
         return x, y
@@ -26,6 +26,9 @@ class Converter():
 
     @staticmethod
     def xy_to_polar(ref_x, ref_y, x, y):
+        if ref_x is None or ref_y is None:
+            ref_x = 0
+            ref_y = 0
         distance = math.sqrt(math.pow(x - ref_x, 2) + math.pow(y - ref_y, 2))
         bearing = math.atan2(x - ref_x, y - ref_y)
         bearing += math.pi
@@ -37,12 +40,16 @@ class Converter():
 
     @staticmethod
     def geo_to_xy(lat, lon):
+        if lat is None or lon is None:
+            return None, None
         p = proj.Proj(proj='utm', zone=23, ellps='WGS84', preserve_units=False)
         x, y = p(lon, lat)
         return x, y
 
     @staticmethod
     def xy_to_geo(x, y):
+        if x is None or y is None:
+            return None, None
         p = proj.Proj(proj='utm', zone=23, ellps='WGS84',
                       preserve_units=False)  # assuming you're using WGS84 geographic
         lon, lat = p(x, y, inverse=True)

@@ -6,9 +6,12 @@ import math
 camera_data = {}
 camera_data['id'] = "Unit Test"
 camera_data['address'] = None
-camera_data['latitude'] = -22.912759833
-camera_data['longitude'] = -43.1582615
+camera_data['latitude'] = -22.912246879883874
+camera_data['longitude'] = -43.15833890364963
 camera_data['standard_bearing'] = 336
+camera_data['installation_height'] = 16.4
+camera_data['surveillance_radius'] = 3000
+
 camera_data['zoom_min'] = 0
 camera_data['zoom_max'] = 30
 camera_data["initial_bearing"]= 6
@@ -17,8 +20,18 @@ camera_data['height_resolution'] = 1080
 camera_data['width_resolution'] = 1920
 camera_data['width_sensor']= 5.6
 camera_data['height_sensor']= 3.1
-camera_data['automatic_yaw_inc'] = 0.01
-camera_data['simulation'] = {"auto_tracking": "Enabled", 'automatic_yaw_inc' : 0.01}
+camera_data['simulation'] = {
+                                "auto_tracking": "Enabled", 
+                                "track_estimation" : "Enabled",
+                                "track":{
+                                    "latitude": -22.930761852665075,
+                                    "longitude":   -43.147083139339685,
+                                    "course": 86,
+                                    "speed": 8
+                                }
+                            }
+                            
+
 camera_data['hfov_max'] = 63.7
 camera_data['hfov_min'] = 2.1
 camera_data['tilt_range'] = 350
@@ -66,8 +79,12 @@ def test_focal_lengh_calculation(real_height, bbox):
     #2945.9633125276887
     #6.274725694444444
 
-def test_ptz_to_polar():
-    camera.set_to_track_position(camera.intitial_bearing, 0, camera.initial_zoom)
-    print(camera.bearing)
-    print(camera.pan)
+def test_polar_to_ptz():
+    camera.interval_measured = 1
+    camera.tracking()
+    print('B: ' + str(camera.bearing))
+    print('PZ: ' + str(camera.physical_zoom))
+    print('P: ' + str(camera.pan))
+    print('T: ' + str(camera.tilt))
+    print('Z: ' + str(camera.zoom))
     

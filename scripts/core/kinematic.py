@@ -58,3 +58,13 @@ class Kinematic:
         self.position = (x, y)
         self.velocity = (vx * 1.94384, vy * 1.94384)
         self.timestamp = timestamp_now
+
+    def linear_estimation(self, vx, vy, delta_t):
+        vx = vx / 1.944
+        vy = vy / 1.944
+        x = self.position[0]
+        y = self.position[1]
+        x = x + (vx * delta_t)
+        y = y + (vy * delta_t)
+        self.position = (x,y)
+        self.velocity = (vx,vy)
