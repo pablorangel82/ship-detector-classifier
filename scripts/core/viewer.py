@@ -11,7 +11,7 @@ color_pin = (67, 135, 226)
 min_rect_width = 300
 font_size = 12
 font_type = ImageFont.truetype("resources/arial.ttf", font_size)
-show_bb_active_track = True
+show_bb_active_track = False
 
 
 def deg_to_dms(deg, coord_type='lat'):
@@ -112,8 +112,8 @@ def view (frame, tracks, camera_bearing, ptz):
     text_camera_bearing =  str(round(camera_bearing,2))
     text_ptz = 'P: ' + str(round(ptz[0],2)) + ' T: ' + str(round(ptz[1],2)) + ' Z: ' + str(round(ptz[2],2)) 
 
-    text_values.append(['Camera\'s bearing: ' + text_camera_bearing, 10, 10, color_text_body])
-    text_values.append(['Camera\'s PTZ: ' + text_ptz, 10, 30, color_text_body])
+    text_values.append(['Camera\'s bearing: ' + text_camera_bearing, 10, 10, color_rect_active])
+    text_values.append(['Camera\'s PTZ: ' + text_ptz, 10, 30, color_rect_active])
     
     image = draw_texts(image, text_values)
     

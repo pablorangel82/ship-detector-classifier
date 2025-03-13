@@ -16,7 +16,7 @@ from core.category import Category
 
 class DCM(Thread):
 
-    def __init__(self, config_path, version, language):
+    def __init__(self, config_path, version, language, camera):
         Thread.__init__(self)
         self.listener = None
         self.tracks_list = {}
@@ -33,14 +33,14 @@ class DCM(Thread):
         if torch.cuda.is_available():
             print('CUDA ENABLED')
             device = 'cuda:0'
-        model_path = os.path.join('core/models/',version+".pt")
+        model_path = os.path.join('scripts/core/models/',version+".pt")
         self.net_classifier = YOLO(model_path).to(device)
         self.net_classifier.conf = self.calibration.threshold_confidence
         self.net_classifier.iou = self.calibration.threshold_intersection_detecting
         self.net_classifier.mode = 'track'
         self.net_classifier.agnostic = False  
         self.net_classifier.multi_label = False
-        self.camera = Camera(camera_data)
+        self.camera = camera
 
     def detect_estimate_and_classify(self):
         raw_img = self.camera.next_frame()
