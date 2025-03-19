@@ -1,14 +1,15 @@
 from core.converter import Converter
 
 class GroundTruth:
-    def __init__(self, lat, lng, course, speed, bearing, azimuth, physical_zoom):
+    def __init__(self, category, lat, lng, course, speed, pan, tilt, zoom):
+        self.category = category
         self.lat = lat
         self.lng = lng
         self.course = course
         self.speed = speed
-        self.bearing = bearing
-        self.azimuth = azimuth
-        self.physical_zoom = physical_zoom
+        self.pan = pan
+        self.tilt = tilt
+        self.zoom = zoom
         self.x,self.y = Converter.geo_to_xy(lat,lng)
         self.vx,self.vy = Converter.polar_to_xy(None,None,course,speed)
 

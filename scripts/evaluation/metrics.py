@@ -89,21 +89,19 @@ class Metric:
         logging.info('MCC:' + str(mcc) )
 
     def show_estimation_metrics(self):    
+        results = self.kem_evaluations.mse_overall_results
         logging.info('\nMSE Evaluations:')
-        for eval in self.kem_evaluations:
-            logging.info('\n MSE - Position and Velocity of ' + str(eval.category))
-            for key,values in eval.mse_overall_results.items():
-                logging.info('UUID: ' + key)
-                for reg in values:
-                    logging.info('\n Timestamp: ' + str(reg[0]))
-                    estimated_lat, estimated_lon, estimated_speed, estimated_course = reg[1]
-                    gt_lat, gt_lon, gt_speed, gt_course = reg[2]
-                    logging.info('Est: ' + str(estimated_lat) + ', ' + str(estimated_lon))
-                    logging.info('GT: ' + str(gt_lat) + ', ' + str(gt_lon))
-                    logging.info('Est. Speed: ' + str(estimated_speed) + ' ' + 'Course: ' + str(estimated_course))
-                    logging.info('GT. Speed: ' + str(gt_speed) + ' ' + 'Course: ' + str(gt_course))
-                    logging.info('\n RMSE Position: ' + str(reg[3]))
-                    logging.info('\n RMSE Velocity: ' + str(reg[4]))
+        for reg in results:
+            logging.info('\n MSE - Position and Velocity')
+            logging.info('\n Timestamp: ' + str(reg[0]))
+            estimated_lat, estimated_lon, estimated_speed, estimated_course = reg[1]
+            gt_lat, gt_lon, gt_speed, gt_course = reg[2]
+            logging.info('Est: ' + str(estimated_lat) + ', ' + str(estimated_lon))
+            logging.info('GT: ' + str(gt_lat) + ', ' + str(gt_lon))
+            logging.info('Est. Speed: ' + str(estimated_speed) + ' ' + 'Course: ' + str(estimated_course))
+            logging.info('GT. Speed: ' + str(gt_speed) + ' ' + 'Course: ' + str(gt_course))
+            logging.info('\n RMSE Position: ' + str(reg[3]))
+            logging.info('\n RMSE Velocity: ' + str(reg[4]))
 
     def compute_metrics_dcm(self):
         versions = ['v1','v2','v3']
@@ -125,7 +123,7 @@ class Metric:
             logging.info('Showing metrics...')
             self.show_detection_and_classification_metrics()
 
-    def compute_metrics_kem(self):
+    def compute_metrics_kem(self, category, test_case):
         versions = ['v1','v2','v3']
         list_versions_categories = []
         list_versions_categories.append(Category.load_categories(versions[0],'en'))
@@ -138,21 +136,14 @@ class Metric:
             categories = list_versions_categories[k]
             self.confusion_matrix = np.zeros((len(categories),len(categories)), dtype=np.int64) 
             self.mcc_table  = np.zeros((len(categories),3), dtype=np.int64)
-            self.kem_evaluations = []
-            for cat in categories:
-                cat_id = categories[cat].id
-                if cat_id != 3: #provisorio
-                    continue
-                logging.info('Preparing model for testing category ' + str(cat_id))
-                kem_eval = KEMEvaluation(cat_id, self.confusion_matrix, self.mcc_table, Metric.INTERVAL)
-                self.kem_evaluations.append(kem_eval)
-                i=0
-                for i in range(1):
-                    logging.info('Evaluating category ' + str(cat_id) + ' with test case ' + str(i))
-                    trial = 'evaluation/trials/'+str(cat_id)+"_"+str(i)+'/config'
-                    kem_eval.add_test_case(i)
-                    logging.info("Evaluating KEM... ")
-                    kem_eval.evaluate(i,trial,versions[k])
+            logging.info('Preparing model for testing category ' + str(category))
+            kem_eval = KEMEvaluation(category, self.confusion_matrix, self.mcc_table, Metric.INTERVAL)
+            self.kem_evaluations = kem_eval
+            
+            logging.info('Evaluating category ' + str(category))
+            trial = 'evaluation/trials/'+str(category)+"_"+str(test_case)+'/'
+            logging.info("Evaluating KEM... ")
+            kem_eval.evaluate(trial,versions[k])
             logging.info('Showing metrics...')
            # self.show_detection_and_classification_metrics()
             self.show_estimation_metrics()    

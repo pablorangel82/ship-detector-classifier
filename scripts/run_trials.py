@@ -4,4 +4,4 @@ import logging
 logging.basicConfig(level=logging.INFO, format='%(message)s', )
 
 m = Metric()
-m.compute_metrics_kem()
+m.compute_metrics_kem(3,0)

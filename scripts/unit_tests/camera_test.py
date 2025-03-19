@@ -8,33 +8,24 @@ camera_data['id'] = "Unit Test"
 camera_data['address'] = None
 camera_data['latitude'] = -22.912246879883874
 camera_data['longitude'] = -43.15833890364963
-camera_data['standard_bearing'] = 336
+camera_data['reference_azimuth'] = 336
+camera_data['reference_altitude'] = 3
 camera_data['installation_height'] = 16.4
 camera_data['surveillance_radius'] = 3000
 
-camera_data['zoom_min'] = 0
-camera_data['zoom_max'] = 30
-camera_data["initial_bearing"]= 6
-camera_data["initial_zoom"]= 26.5
+camera_data['zoom_x_min'] = 0
+camera_data['zoom_x_max'] = 30
+camera_data['zoom_lens_min'] = 4.3
+camera_data['zoom_lens_max'] = 129
 camera_data['height_resolution'] = 1080
 camera_data['width_resolution'] = 1920
-camera_data['width_sensor']= 5.6
-camera_data['height_sensor']= 3.1
-camera_data['simulation'] = {
-                                "auto_tracking": "Enabled", 
-                                "track_estimation" : "Enabled",
-                                "track":{
-                                    "latitude": -22.930761852665075,
-                                    "longitude":   -43.147083139339685,
-                                    "course": 86,
-                                    "speed": 8
-                                }
-                            }
-                            
+camera_data['width_sensor']= 6.4
+camera_data['height_sensor']= 4.8
+                          
 
 camera_data['hfov_max'] = 63.7
 camera_data['hfov_min'] = 2.1
-camera_data['tilt_range'] = 350
+camera_data['tilt_range'] = 180
 camera_data['pan_range'] = 360
 camera_data['frame_rate'] = 30
 camera = Camera(camera_data)
@@ -83,7 +74,7 @@ def test_polar_to_ptz():
     camera.interval_measured = 1
     camera.tracking()
     print('B: ' + str(camera.bearing))
-    print('PZ: ' + str(camera.physical_zoom))
+    print('PZ: ' + str(camera.zoom_multiplier))
     print('P: ' + str(camera.pan))
     print('T: ' + str(camera.tilt))
     print('Z: ' + str(camera.zoom))
