@@ -117,6 +117,5 @@ def view (frame, tracks, camera_bearing, ptz):
     
     image = draw_texts(image, text_values)
     
-
-    cv2.imshow("Ship Detector Classifier",image)
+    return image
     

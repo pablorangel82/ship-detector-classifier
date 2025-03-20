@@ -85,7 +85,7 @@ class Track:
         if lat and lon is not None:
             distance_realibility = 'false'
             unknown_id = (core.category.Category.CATEGORIES[len(core.category.Category.CATEGORIES) -1]).id
-            if self.classification.category.id != unknown_id:
+            if self.classification.elected != unknown_id:
                 distance_realibility = 'true'
                 speed = float(speed)
                 course =float(course)
@@ -97,6 +97,7 @@ class Track:
             
             obj = {
                 "id" : self.uuid,
+                "id_category": self.classification.elected[0].id,
                 "name" : self.get_name(),
                 "lat" : lat,
                 "lon": lon,

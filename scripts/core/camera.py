@@ -100,7 +100,7 @@ class Camera:
         #             #self.tracking()
         return frame
     
-    def tracking(self, track):
+    def tracking(self, track, offset):
         x, y = Converter.geo_to_xy(track.lat, track.lon)
         track.utm.position = (x, y)
         previous_timestamp = self.timestamp_ptz
@@ -112,13 +112,9 @@ class Camera:
         track.lat, track.lon = Converter.xy_to_geo(track.utm.position[0],track.utm.position[1])
         bearing, distance = Converter.geo_to_polar(self.lat,self.lon,track.lat,track.lon)
         
-        print('\n')
-        print(f'Bearing: {bearing}')
-        print(f'Distance: {distance}')
+        self.set_to_track_position(bearing,distance, offset)
         
-        self.set_to_track_position(bearing,distance)
-        
-    def set_to_track_position (self, bearing, distance):
+    def set_to_track_position (self, bearing, distance, offset):
         p = 0
         t = 0
         z = 0
@@ -136,7 +132,7 @@ class Camera:
         theta += self.ref_azimuth
         if theta > 360:
             theta = theta - 360
-        print(theta)
+
         if theta > 180:
             t = 180 / theta 
             t = 1-t
@@ -145,7 +141,6 @@ class Camera:
             t = theta / 180
             t = (1- t)*-1
 
-        print(t)
         bearing = bearing + (360 - self.ref_bearing)
         if bearing >= 360:
             bearing = bearing - 360
@@ -154,11 +149,11 @@ class Camera:
             p = bearing / 180
         else:
             p = ((360 - bearing) / 180) * -1
-        
-        # if z == 1:
-        #     p = p / 0.15
-        # else:
-        #     p = p / (1 - z)
+            
+        if offset:
+            p += float(offset.get('p'))
+            t += float(offset.get('t'))
+            z += float(offset.get('z'))
 
         self.set_ptz(p,t,z)
 

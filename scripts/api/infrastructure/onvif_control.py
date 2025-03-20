@@ -1,5 +1,6 @@
 import time
 import json
+import threading
 from onvif import ONVIFCamera
 
 import api.config.logging_config as logger
@@ -122,7 +123,7 @@ class ONVIFControl():
 
     def set_ptz_status(self):
         while True:
-            if self.token is not None:
+            if self.cam_connection and self.token:
                 status = self.ptz_service.GetStatus({'ProfileToken': self.token})
                 self.pan = status.Position.PanTilt.x
                 self.tilt = status.Position.PanTilt.y
@@ -130,3 +131,7 @@ class ONVIFControl():
 
     def get_ptz_status(self):
         return self.pan, self.tilt, self.zoom
+    
+    def start_status_after_connect(self):
+        self.connect()
+        threading.Thread(target=self.set_ptz_status, daemon=True).start()  

@@ -16,8 +16,5 @@ class TrackingService:
         track.lon = lon
         track.course = rumo
         track.speed = velocidade
-            
-        print('\n')
-        print(f"{track.lat}, {track.lon}")
         
-        self.camera.tracking(track)
+        self.camera.tracking(track, offset)

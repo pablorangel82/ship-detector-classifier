@@ -7,13 +7,12 @@ from core.viewer import view
 from api.service.integration_service import IntegrationService
 from api.infrastructure.classification_publisher import ClassificationPublisher
 from api.infrastructure.onvif_control import ONVIFControl
-import api.config.logging_config as logger
 from core.camera import Camera
 
 config_path = 'scripts/api/config/setup'
 
 onvif_control = ONVIFControl(config_path)
-threading.Thread(target=onvif_control.connect, daemon=True).start()
+threading.Thread(target=onvif_control.start_status_after_connect, daemon=True).start()
 
 json_file = open(config_path+'.json')
 config_data = json.load(json_file)
@@ -31,7 +30,7 @@ threading.Thread(target=integration_service.video_stream, args=(classification_p
 while True:
     img_to_show,tracks_list = dcm.detect_estimate_and_classify()
     if img_to_show is not None:
-        view(img_to_show, tracks_list, dcm.camera.bearing, [dcm.camera.pan,dcm.camera.tilt,dcm.camera.zoom])
-        # classification_publisher.write(img_to_show, {})
+        img_to_show = view(img_to_show, tracks_list, dcm.camera.bearing, [dcm.camera.pan,dcm.camera.tilt,dcm.camera.zoom])
+        classification_publisher.write(img_to_show, tracks_list, onvif_control)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break

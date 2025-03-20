@@ -4,17 +4,17 @@ import base64
 import json
 
 class ClassificationPublisher(queue.Queue):
-    def write(self, frame, tracks):
+    def write(self, frame, tracks, onvif_control):
         if frame is not None and frame.size > 0:
             if not self.empty():
                 while not self.empty():
                     self.get_nowait()
-            self.put_nowait(f'{self.generate(frame, tracks)}\n\n')
+            self.put_nowait(f'{self.generate(frame, tracks, onvif_control)}\n\n')
 
     def __iter__(self):
         return iter(self.get, None)
 
-    def generate(self, frame, tracks_list):
+    def generate(self, frame, tracks_list, onvif_control):
         success, encoded_frame = cv2.imencode('.jpg', frame, [int(cv2.IMWRITE_JPEG_QUALITY), 80])
         if not success:
             return None
@@ -24,7 +24,13 @@ class ClassificationPublisher(queue.Queue):
             for track in tracks_list.values():
                 tracks.append(track.to_json())
 
+        pan, tilt, zoom = onvif_control.get_ptz_status()
         return json.dumps({
             'frame': base64.b64encode(encoded_frame).decode('utf-8'),
-            'tracks': tracks
+            'tracks': tracks,
+            'calibration': {
+                'p': pan,
+                't': tilt,
+                'z': zoom
+            }
         })
