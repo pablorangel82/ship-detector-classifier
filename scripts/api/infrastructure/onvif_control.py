@@ -20,7 +20,6 @@ class ONVIFControl():
         
         json_file = open(config_path + '.json')
         self.config_data = json.load(json_file)
-        self.camera_data = self.config_data['camera']
         self.onvif_data = self.config_data['onvif']
         self.cam_connection = None
         self.ptz_service = None
@@ -34,10 +33,10 @@ class ONVIFControl():
         while not connected:
             try:
                 self.cam_connection = ONVIFCamera(
-                    self.camera_data['ip'], 
+                    self.onvif_data['ip'],
                     self.onvif_data['port'], 
-                    self.camera_data['user'],
-                    self.camera_data['password']
+                    self.onvif_data['username'],
+                    self.onvif_data['password']
                 )
                 self.ptz_service = self.cam_connection.create_ptz_service()
 

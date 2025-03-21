@@ -10,13 +10,13 @@ class IntegrationService:
     def __init__(self, config_path, onvif_control, camera):
         json_file = open(config_path + '.json')
         self.config_data = json.load(json_file)
-        self.camera_data = self.config_data['camera']
+        self.onvif_data = self.config_data['onvif']
         self.rest_data = self.config_data['rest']
         self.onvif_control = onvif_control
         self.ptz_connection = False
         self.video_streaming_connection = False
         self.camera = camera
-        threading.Thread(target=self.get_ptz, args=(f"{self.rest_data['ptz_url']}/{self.camera_data['ip']}", ), daemon=True).start()
+        threading.Thread(target=self.get_ptz, args=(f"{self.rest_data['ptz_url']}/{self.onvif_data['ip']}", ), daemon=True).start()
         
     def get_ptz(self, url):
         headers = {
@@ -51,15 +51,15 @@ class IntegrationService:
                                 case 'center':
                                     self.onvif_control.center()
                                 case _:
-                                    tracking_service = TrackingService(self.camera)
+                                    tracking_service = TrackingService(self.onvif_control, self.camera)
                                     tracking_service.track(command)
             
             except requests.exceptions.ChunkedEncodingError as e:
                 logger.log.error(f'Requisição finalizada pelo servidor: {e}')
                 self.ptz_connection = False
                 
-                
             except Exception as e:
+                print('ENTROU')
                 logger.log.error(f'Requisição finalizada pelo servidor: {e}')
                 self.ptz_connection = False
                 
@@ -74,7 +74,7 @@ class IntegrationService:
                 }
                 
                 requests.post(
-                    f"{self.rest_data['streaming_url']}/{self.camera_data['ip']}/{self.camera_data['id']}", 
+                    f"{self.rest_data['streaming_url']}/{self.onvif_data['ip']}/{self.camera.id}", 
                     headers=headers, 
                     data=iterable, 
                     verify=False

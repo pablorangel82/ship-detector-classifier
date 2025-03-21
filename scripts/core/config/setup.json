@@ -1,41 +1,28 @@
 {
     "camera" : {
         "id": "EN",
-        "address": "core/samples/barca.mp4",
+        "address": "rtsp://admin:c4i2sr@10.0.27.234:554/Stream0",
         "latitude": -22.912759833,
         "longitude": -43.1582615,
         "installation_height": 16.4,
-        "surveillance_radius": 1580,
-        "standard_bearing": 336,
-        "initial_bearing": 6,
-        "initial_zoom": 30,
-        "zoom_min": 0,
-        "zoom_max": 30,
-        "hfov_min":2.1,
-        "hfov_max":63.7,
-        "tilt_range": 350,
-        "pan_range": 360,
+        "surveillance_radius": 2800,
+        "reference_azimuth": 338.5,
+        "reference_altitude": 4.5,
+        "sensor_width": 6.4,
+        "sensor_height": 3.1,
+        "zoom_multiplier_min": 0,
+        "zoom_multiplier_max": 30,
+        "zoom_lens_min": 4.3,
+        "zoom_lens_max": 129,
         "frame_rate": 30,
         "width_resolution": 1920,
-        "height_resolution": 1080,
-        "width_sensor": 5.6,
-        "height_sensor": 3.1,
-        "simulation" :{
-            "auto_tracking": "Enabled",
-            "track_estimation":"Enabled",
-            "track":{
-                "latitude":-22.89906007961175,
-                "longitude": -43.156920274739,
-                "course": 86,
-                "speed": 8
-            }
-        }
+        "height_resolution": 1080
     },
     "calibration" : {
         "threshold_intersection_detecting": 0.6,
-        "threshold_confidence" : 0.05,
-        "threshold_classification" : 0.02,
-        "threshold_intersection_tracking": 0.2,
+        "threshold_confidence" : 0.2,
+        "threshold_classification" : 0.25,
+        "threshold_intersection_tracking": 0.1,
         "train_img_width" : 640,
         "train_img_height" : 640,
         "resize": "True"

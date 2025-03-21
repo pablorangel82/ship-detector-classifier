@@ -16,7 +16,7 @@ from core.category import Category
 
 class DCM(Thread):
 
-    def __init__(self, config_path, version, language, camera):
+    def __init__(self, config_path, version, language):
         Thread.__init__(self)
         self.listener = None
         self.tracks_list = {}
@@ -40,7 +40,7 @@ class DCM(Thread):
         self.net_classifier.mode = 'track'
         self.net_classifier.agnostic = False  
         self.net_classifier.multi_label = False
-        self.camera = camera
+        self.camera = Camera(camera_data)
 
     def detect_estimate_and_classify(self):
         raw_img = self.camera.next_frame()

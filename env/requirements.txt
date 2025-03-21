@@ -7,3 +7,4 @@ opencv-python
 ultralytics
 beautifulsoup4
 lxml
+pika

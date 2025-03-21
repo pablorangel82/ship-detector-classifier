@@ -19,9 +19,9 @@ class Track:
         self.distance_from_camera = None
         self.bbox = None
         self.lost = False
-        self.bbox_xy = Kinematic (observation_noise=5)
-        self.bbox_wh = Kinematic (observation_noise=5)
-        self.utm = Kinematic (observation_noise=17)
+        self.bbox_xy = Kinematic (observation_noise=7)
+        self.bbox_wh = Kinematic (observation_noise=7)
+        self.utm = Kinematic (observation_noise=5)
 
     def update(self, detected_bbox, camera, confidence, category_index):
         self.lost = False

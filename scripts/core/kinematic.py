@@ -50,7 +50,7 @@ class Kinematic:
        
     def update(self, estimated_x, estimated_y):
         timestamp_now = datetime.now()
-        q = Q_discrete_white_noise(dim=2, dt=self.delta_t, var=0.0000013)
+        q = Q_discrete_white_noise(dim=2, dt=self.delta_t, var=0.013)
         self.kf.Q = block_diag(q, q)
         self.kf.F[0][1] = self.delta_t
         self.kf.F[2][3] = self.delta_t

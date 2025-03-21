@@ -1,0 +1,20 @@
+{
+    "rest" : {
+        "ptz_url": "https://10.7.40.18/controle-cameras/v1/integracao/ptz/",
+        "streaming_url": "https://10.7.40.18/controle-cameras/v1/integracao/streaming/",
+        "apikey": "aGlkcmEtYXBpa2V5LjE4LmhkdENjTXluUFpRVDFoSmNDZFpxMlYwNEJ0aGVBTGdFZDM4YVlhRHUxSUd2WUdXcUpteQ=="
+    },
+    "onvif" : {
+        "port": 80,
+        "ip": "10.0.27.234",
+        "username": "admin",
+        "password": "c4i2sr"
+    },
+    "rabbitmq": {
+        "host": "10.7.40.18",
+        "port": 5672,
+        "username": "admin",
+        "password": "gsd14@scua1234",
+        "queue": "sinal.bussola.classificador.imagens"
+    }
+}
