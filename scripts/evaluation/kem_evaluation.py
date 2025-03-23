@@ -49,11 +49,10 @@ class KEMEvaluation (Listener):
             img_to_show,tracks_list = dcm.detect_estimate_and_classify()
             if img_to_show is None and tracks_list is None:
                 break
-            view(img_to_show, tracks_list, dcm.camera.bearing, [dcm.camera.pan,dcm.camera.tilt,dcm.camera.zoom])
+            view(img_to_show, tracks_list, dcm.camera)
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
             ellapsed+=dcm.camera.interval_measured
-            camera_ptz_setted+=dcm.camera.interval_measured
         estimated_interval = 1/(frames/ellapsed)
         resolution_interval = (KEMEvaluation.RESOLUTION * estimated_interval) / self.interval
         logging.info ('Estimation Task for ' + str(ellapsed/60) + ' minutes video duration with estimated interval ' + str(estimated_interval))

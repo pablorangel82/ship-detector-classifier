@@ -42,7 +42,7 @@ def draw_texts(source_image,values):
     image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
     return image
 
-def view (frame, tracks, camera_bearing, ptz):
+def view (frame, tracks, camera):
     image = frame
     text_values = []
     for track in tracks.values():
@@ -82,9 +82,13 @@ def view (frame, tracks, camera_bearing, ptz):
         if track.lost:
             image = cv2.rectangle(image, (px,py), (px+w,py+h), color_rect_lost,1)
         else:
+            xmin = int(px + (w/4))
+            ymin = int(py - (font_size * 5))
             if show_bb_active_track:
                 image = cv2.rectangle(image, (px,py), (px+w,py+h), color_rect_active,1)
-            text_title = track.classification.to_string()
+                text_title = '[' + str(px)+','+str(py) + ',' + str(w) + ',' + str(h) + ']'
+                text_values.append([text_title,px,py-20,color_rect_active])
+                text_title = track.classification.to_string()
             xmin = int(px + (w/4))
             ymin = int(py - (font_size * 5))
             rect_width = (font_size * len(text_title) * 0.6)+2
@@ -109,11 +113,15 @@ def view (frame, tracks, camera_bearing, ptz):
                 ymin = int(py - (font_size * 1))
                 text_values.append([text_velociy,xmin,ymin,color_text_body])
 
-    text_camera_bearing =  str(round(camera_bearing,2))
-    text_ptz = 'P: ' + str(round(ptz[0],2)) + ' T: ' + str(round(ptz[1],2)) + ' Z: ' + str(round(ptz[2],2)) 
+    text_camera_azimuth =  str(round(camera.bearing,5))
+    text_camera_elevation =  str(round(camera.elevation,5))
+    text_camera_hfov =  str(round(camera.hfov,5))
+    text_ptz = 'P: ' + str(round(camera.pan,2)) + ' T: ' + str(round(camera.tilt,2)) + ' Z: ' + str(round(camera.zoom,2)) 
 
-    text_values.append(['Camera\'s bearing: ' + text_camera_bearing, 10, 10, color_text_body])
-    text_values.append(['Camera\'s PTZ: ' + text_ptz, 10, 30, color_text_body])
+    text_values.append([f'Camera\'s azimuth: {text_camera_azimuth}º', 10, 10, color_text_body])
+    text_values.append([f'Camera\'s elevation: {text_camera_elevation}º', 10, 30, color_text_body])
+    text_values.append([f'Camera\'s HFOV: {text_camera_hfov}º', 10, 50, color_text_body])
+    text_values.append([f'Camera\'s PTZ: {text_ptz}', 10, 70, color_text_body])
     
     image = draw_texts(image, text_values)
     
