@@ -1,8 +1,8 @@
 {
     "rest" : {
-        "ptz_url": "https://10.7.40.18/controle-cameras/v1/integracao/ptz/",
-        "streaming_url": "https://10.7.40.18/controle-cameras/v1/integracao/streaming/",
-        "apikey": "aGlkcmEtYXBpa2V5LjE4LmhkdENjTXluUFpRVDFoSmNDZFpxMlYwNEJ0aGVBTGdFZDM4YVlhRHUxSUd2WUdXcUpteQ=="
+        "ptz_url": "https://10.7.40.172/controle-cameras/v1/integracao/ptz/",
+        "streaming_url": "https://10.7.40.172/controle-cameras/v1/integracao/streaming/",
+        "apikey": "aGlkcmEtYXBpa2V5LjE0OTgucHFJMlpUS3ZjS29YNnZJM3VZZnBUaHhDWTZET2JVOWNBZ0F4UkhIbFhHTkFIYmZqaFhp"
     },
     "onvif" : {
         "port": 80,
