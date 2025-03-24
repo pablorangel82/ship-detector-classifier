@@ -8,34 +8,21 @@ camera_data['id'] = "Unit Test"
 camera_data['address'] = None
 camera_data['latitude'] = -22.912246879883874
 camera_data['longitude'] = -43.15833890364963
-camera_data['standard_bearing'] = 336
+camera_data['reference_azimuth'] = 336
+camera_data['reference_elevation'] = 0
 camera_data['installation_height'] = 16.4
 camera_data['surveillance_radius'] = 3000
-
-camera_data['zoom_min'] = 0
-camera_data['zoom_max'] = 30
-camera_data["initial_bearing"]= 6
-camera_data["initial_zoom"]= 26.5
+camera_data['focus_frame_view'] = 550
+camera_data['hfov_min'] = 2.1
+camera_data['hfov_max'] = 63.7
+camera_data['zoom_multiplier_min'] = 0
+camera_data['zoom_multiplier_max'] = 30
+camera_data['zoom_lens_min'] = 4.3
+camera_data['zoom_lens_max'] = 129
 camera_data['height_resolution'] = 1080
 camera_data['width_resolution'] = 1920
-camera_data['width_sensor']= 5.6
-camera_data['height_sensor']= 3.1
-camera_data['simulation'] = {
-                                "auto_tracking": "Enabled", 
-                                "track_estimation" : "Enabled",
-                                "track":{
-                                    "latitude": -22.930761852665075,
-                                    "longitude":   -43.147083139339685,
-                                    "course": 86,
-                                    "speed": 8
-                                }
-                            }
-                            
-
-camera_data['hfov_max'] = 63.7
-camera_data['hfov_min'] = 2.1
-camera_data['tilt_range'] = 350
-camera_data['pan_range'] = 360
+camera_data['sensor_width']= 6.42
+camera_data['sensor_height']= 3.1
 camera_data['frame_rate'] = 30
 camera = Camera(camera_data)
 
@@ -64,7 +51,7 @@ def calculate_iou(bb1, bb2):
     return iou
 
 def test_focal_lengh_calculation(real_height, bbox): 
-    camera.set_to_track_position(6.274725694444444, 0, 30)
+    camera.set_to_track_position(60, 3200)
     x, y, b, d = MonocularVision.monocular_vision_detection_method_2(camera, real_height, bbox)
     new_position_lat, new_position_lon = Converter.xy_to_geo(x,y)
     print('Pan: ' + str(camera.pan))
@@ -87,4 +74,12 @@ def test_polar_to_ptz():
     print('P: ' + str(camera.pan))
     print('T: ' + str(camera.tilt))
     print('Z: ' + str(camera.zoom))
-    
+
+def test_tilt(bearing, distance):
+    camera.set_to_track_position(bearing,distance)
+    print('Bearing: ' + str(camera.bearing))
+    print('Physical Zoom: ' + str(camera.zoom_multiplier))
+    print('Elevation: ' + str(camera.elevation))
+    print('P: ' + str(camera.pan))
+    print('T: ' + str(camera.tilt))
+    print('Z: ' + str(camera.zoom))

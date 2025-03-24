@@ -35,13 +35,14 @@ class Track:
         self.utm.delta_t = camera.interval_measured
         self.bbox_xy.update(px, py)
         self.bbox_wh.update(w,h)
-        self.bbox = [self.bbox_xy.position[0], self.bbox_xy.position[1], self.bbox_wh.position[0], self.bbox_wh.position[1]]
+        self.bbox = [px, self.bbox_xy.position[1], self.bbox_wh.position[0], self.bbox_wh.position[1]]
         
         self.classification.update(confidence, category_index, self.bbox)
         
         air_draught = self.classification.elected[0].max_air_draught
         detected_bbox [2] = self.classification.elected[3][2]
         detected_bbox [3] = self.classification.elected[3][3]
+        
         estimated_x, estimated_y, self.bearing, distance_from_camera = MonocularVision.monocular_vision_detection_method_2(camera, air_draught, detected_bbox)
         self.utm.update(estimated_x, estimated_y)
         self.lat, self.lon = Converter.xy_to_geo(estimated_x, estimated_y)

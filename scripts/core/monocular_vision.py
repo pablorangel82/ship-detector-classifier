@@ -32,13 +32,13 @@ class MonocularVision():
         new_bearing = camera.bearing
         if x_center_pixel > x_center_frame:
             fator = 1 - ((camera.width_resolution - x_center_pixel) / (camera.width_resolution/2))
-            diff_degrees = fator * math.degrees(camera.hfov/2)
+            diff_degrees = fator * (camera.hfov/2)
             new_bearing = new_bearing + diff_degrees
             if new_bearing > 360:
                 new_bearing = new_bearing - 360
         else:
             fator = 1- (x_center_pixel / (camera.width_resolution/2))
-            diff_degrees = fator * math.degrees(camera.hfov/2)
+            diff_degrees = fator * (camera.hfov/2)
             new_bearing = new_bearing - diff_degrees
             if new_bearing < 0:
                 new_bearing = 360 - abs(new_bearing)
