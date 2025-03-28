@@ -16,9 +16,9 @@ categories = {
     "Passenger Ships": {
         "id": 2,
         "name": "Navio de Passageiros",
-        "max_air_draught": 21317.15,
-        "min_air_draught": 12435.01,
-        "avg_air_draught": 16876.08
+        "max_air_draught": 18131.67,
+        "min_air_draught": 10576.81,
+        "avg_air_draught": 14354.24
     },
     "Ro-ro Passenger Ships": {
         "id": 3,

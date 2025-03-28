@@ -21,7 +21,7 @@ class Track:
         self.lost = False
         self.bbox_xy = Kinematic (observation_noise=7)
         self.bbox_wh = Kinematic (observation_noise=7)
-        self.utm = Kinematic (observation_noise=5)
+        self.utm = Kinematic (observation_noise=15)
 
     def update(self, detected_bbox, camera, confidence, category_index):
         self.lost = False
@@ -111,7 +111,7 @@ class Track:
                 "course": course,
                 "bearing": bearing,
                 "lost": lost,
-                "classification": classification,
+                # "classification": classification,
                 "distance_realibility":distance_realibility
             }
         return obj

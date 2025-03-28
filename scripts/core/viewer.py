@@ -88,7 +88,8 @@ def view (frame, tracks, camera):
                 image = cv2.rectangle(image, (px,py), (px+w,py+h), color_rect_active,1)
                 text_title = '[' + str(px)+','+str(py) + ',' + str(w) + ',' + str(h) + ']'
                 text_values.append([text_title,px,py-20,color_rect_active])
-                text_title = track.classification.to_string()
+                
+            text_title = track.classification.to_string()
             xmin = int(px + (w/4))
             ymin = int(py - (font_size * 5))
             rect_width = (font_size * len(text_title) * 0.6)+2
@@ -113,15 +114,15 @@ def view (frame, tracks, camera):
                 ymin = int(py - (font_size * 1))
                 text_values.append([text_velociy,xmin,ymin,color_text_body])
 
-    text_camera_azimuth =  str(round(camera.bearing,5))
-    text_camera_elevation =  str(round(camera.elevation,5))
-    text_camera_hfov =  str(round(camera.hfov,5))
+    text_camera_azimuth =  str(round(camera.bearing,2))
+    text_camera_elevation =  str(round(camera.elevation,2))
+    text_camera_hfov =  str(round(camera.hfov,2))
     text_ptz = 'P: ' + str(round(camera.pan,2)) + ' T: ' + str(round(camera.tilt,2)) + ' Z: ' + str(round(camera.zoom,2)) 
 
-    text_values.append([f'Camera\'s azimuth: {text_camera_azimuth}º', 10, 10, color_text_body])
-    text_values.append([f'Camera\'s elevation: {text_camera_elevation}º', 10, 30, color_text_body])
-    text_values.append([f'Camera\'s HFOV: {text_camera_hfov}º', 10, 50, color_text_body])
-    text_values.append([f'Camera\'s PTZ: {text_ptz}', 10, 70, color_text_body])
+    text_values.append([f'Camera\'s azimuth: {text_camera_azimuth}º', 10, 10, color_rect_active])
+    text_values.append([f'Camera\'s elevation: {text_camera_elevation}º', 10, 30, color_rect_active])
+    text_values.append([f'Camera\'s HFOV: {text_camera_hfov}º', 10, 50, color_rect_active])
+    text_values.append([f'Camera\'s PTZ: {text_ptz}', 10, 70, color_rect_active])
     
     image = draw_texts(image, text_values)
     

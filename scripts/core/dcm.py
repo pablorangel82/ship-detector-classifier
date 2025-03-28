@@ -100,7 +100,7 @@ class DCM(Thread):
 
     def tracking(self, confidence, label, detected_bbox):
         track_candidate = None
-        best_iou = 0
+        best_iou = None
         action = Listener.EVENT_UPDATE
 
         with self.control_access_track_list:
@@ -120,11 +120,12 @@ class DCM(Thread):
                 bb2 = (new_x1, new_y1, new_x2, new_y2)
                 
                 iou = self.calculate_iou(bb1,bb2)
-                if iou > best_iou:
-                    track_candidate = track
-                    best_iou = iou
+                if iou > self.calibration.threshold_intersection_tracking:
+                    if best_iou is None or (best_iou is not None and iou > best_iou):
+                        track_candidate = track
+                        best_iou = iou
 
-            if best_iou < self.calibration.threshold_intersection_tracking:
+            if best_iou is None:
                 track_candidate = Track(self.camera.id)
                 action = Listener.EVENT_CREATE
                

@@ -84,23 +84,35 @@ class Camera:
     def tracking(self, track, offset):
         x, y = Converter.geo_to_xy(track.lat, track.lon)
         track.utm.position = (x, y)
+        #logging.info(f'Xp: {track.utm.position[0]}')
+        #logging.info(f'Yp: {track.utm.position[1]}')
         track.utm.timestamp = datetime.now(timezone.utc)
         interval = (track.utm.timestamp - self.timestamp_ptz).seconds
+        interval += 5
         
-        vx, vy = Converter.polar_to_xy(0,0,track.course,track.speed)
+        vx, vy = Converter.polar_to_xy(None,None,track.course,track.speed)
         track.utm.linear_estimation(vx, vy, interval)
         lat, lon = Converter.xy_to_geo(track.utm.position[0],track.utm.position[1])
+        
         bearing, distance = Converter.geo_to_polar(self.lat,self.lon,lat,lon)
         
+        print('\n')
         logging.info(f'Bearing: {bearing}')
         logging.info(f'Distance: {distance}')
         logging.info(f'Interval: {interval}')
-        logging.info(f'Track timestamp: {track.utm.timestamp}')
-        logging.info(f'Previous timestamp: {self.timestamp_ptz}')
+        logging.info(f'Speed: {track.speed}')
+        logging.info(f'Course: {track.course}')
+        # logging.info(f'Track timestamp: {track.utm.timestamp}')
+        # logging.info(f'Previous timestamp: {self.timestamp_ptz}')
+        # logging.info(f'VX: {vx}')
+        # logging.info(f'VY: {vy}')
+        # logging.info(f'X: {x}')
+        # logging.info(f'Y: {y}')
+        print('\n')
         
         self.set_to_track_position(bearing,distance, offset)
         
-    def set_to_track_position(self, bearing, distance):
+    def set_to_track_position(self, bearing, distance, offset=None):
         p = 0
         t = 0
         z = 0
@@ -112,10 +124,9 @@ class Camera:
         theta += math.pi
         theta = math.degrees(theta)
         theta += self.ref_elevation
-        theta = theta - 180
-
+        theta = theta - 180  
         t = ((theta - (-90)) / (90 - (-90))) * 2 - 1
-
+        t *= -1
         self.elevation = t * 90
         self.bearing = bearing
         bearing = bearing + (360 - self.ref_azimuth)
@@ -128,9 +139,12 @@ class Camera:
         else:
             p = ((360 - bearing) / 180) * -1
         
-        # p += float(offset.get('p'))
-        # t += float(offset.get('t'))
-        # z += float(offset.get('z'))
+        
+        if offset is not None:
+            p += float(offset.get('p'))
+            t += float(offset.get('t'))
+            z += float(offset.get('z'))
+            
         
         self.set_ptz(p,t,z)
 

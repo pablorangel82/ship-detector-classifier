@@ -59,12 +59,12 @@ class ONVIFControl():
         pan = pan - distance
         self.perform_move(pan, tilt)
 
-    def move_up(self, distance=0.02):
+    def move_up(self, distance=0.005):
         pan, tilt, zoom = self.get_ptz_status()
         tilt = tilt + distance
         self.perform_move(pan, tilt)
 
-    def move_down(self, distance=0.02):
+    def move_down(self, distance=0.005):
         pan, tilt, zoom = self.get_ptz_status()
         tilt = tilt - distance
         self.perform_move(pan, tilt)

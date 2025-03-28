@@ -8,7 +8,6 @@ class Classification:
         self.categories=[]
         self.elected = None
         for i in range(len(Category.CATEGORIES)):
-            confidence_list = [None for element in range(10)]
             self.categories.append((Category.CATEGORIES[i], 0, 0, None))
 
     def update(self, confidence, category_index, bbox):

@@ -1,7 +1,5 @@
-from datetime import datetime, timezone
+from datetime import datetime
 from core.track import Track
-from core.kinematic import Kinematic
-from core.converter import Converter
 
 class TrackingService:
     def __init__(self, onvif_control, camera):
@@ -14,7 +12,7 @@ class TrackingService:
         rumo = goto.get('rumo', 0.0)
         velocidade = goto.get('velocidade', 0.0)
         offset = goto.get('offset')
-        timestamp = datetime.strptime(goto.get('timestamp'), "%Y-%m-%dT%H:%M:%S.%f%z")#.replace(tzinfo=None)
+        timestamp = datetime.strptime(goto.get('timestamp'), "%Y-%m-%dT%H:%M:%S.%f%z")
         
         track = Track(self.camera.id)
         track.lat = lat

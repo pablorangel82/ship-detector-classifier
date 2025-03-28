@@ -20,7 +20,7 @@ class ClassificationPublisher(queue.Queue):
             return None
 
         tracks = []
-        if tracks_list is not None:
+        if tracks_list is not None and bool(tracks_list):
             for track in tracks_list.values():
                 tracks.append(track.to_json())
 

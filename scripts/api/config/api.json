@@ -15,6 +15,6 @@
         "port": 5672,
         "username": "admin",
         "password": "gsd14@scua1234",
-        "export": false
+        "export": true
     }
 }
