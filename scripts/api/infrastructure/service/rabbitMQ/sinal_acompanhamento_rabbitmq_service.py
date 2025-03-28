@@ -28,21 +28,22 @@ class SinalACompanhamentoCameraRabbitMQService:
         self.channel.exchange_declare(exchange=self.exchange, exchange_type=self.exchange_type, durable=True)
     
     def send_tracks(self):
-        while True:
+        while True and self.rabbitmq_data['export']:
             with self.lock:
                 if self.tracks_json is not None:
                     self.channel.basic_publish(exchange=self.exchange, routing_key='', body=self.tracks_json)
             time.sleep(3)
             
     def convert_list(self, tracks_list):
-        converted_list = []
-        
-        for value in tracks_list.values():
-            converted_list.append(AcompanhamentoCameraDTO(value))
+        if self.rabbitmq_data['export']:
+            converted_list = []
             
-        if bool(converted_list) and converted_list is not None:
-            with self.lock:
-                self.tracks_json = json.dumps([ob.to_json() for ob in converted_list])
+            for value in tracks_list.values():
+                converted_list.append(AcompanhamentoCameraDTO(value))
+                
+            if bool(converted_list) and converted_list is not None:
+                with self.lock:
+                    self.tracks_json = json.dumps([ob.to_json() for ob in converted_list])
         
     def close_connection(self):
         if self.connection and not self.connection.is_closed:

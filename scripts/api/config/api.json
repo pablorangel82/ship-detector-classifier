@@ -11,10 +11,10 @@
         "password": "c4i2sr"
     },
     "rabbitmq": {
-        "host": "10.7.40.18",
+        "host": "10.7.40.172",
         "port": 5672,
         "username": "admin",
         "password": "gsd14@scua1234",
-        "queue": "sinal.bussola.classificador.imagens"
+        "export": false
     }
 }
