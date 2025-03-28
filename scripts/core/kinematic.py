@@ -64,10 +64,7 @@ class Kinematic:
         vy = vy / 1.944
         x = self.position[0]
         y = self.position[1]
-        print(delta_t)
         x = x + (vx * delta_t)
         y = y + (vy * delta_t)
         self.position = (x,y)
         self.velocity = (vx,vy)
-      #  print(f'Xe:{x}')
-      #  print(f'Ye:{y}')

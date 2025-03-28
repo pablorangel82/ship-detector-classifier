@@ -84,8 +84,6 @@ class Camera:
     def tracking(self, track, offset):
         x, y = Converter.geo_to_xy(track.lat, track.lon)
         track.utm.position = (x, y)
-        #logging.info(f'Xp: {track.utm.position[0]}')
-        #logging.info(f'Yp: {track.utm.position[1]}')
         track.utm.timestamp = datetime.now(timezone.utc)
         interval = (track.utm.timestamp - self.timestamp_ptz).seconds
         interval += 5
@@ -95,20 +93,6 @@ class Camera:
         lat, lon = Converter.xy_to_geo(track.utm.position[0],track.utm.position[1])
         
         bearing, distance = Converter.geo_to_polar(self.lat,self.lon,lat,lon)
-        
-        print('\n')
-        logging.info(f'Bearing: {bearing}')
-        logging.info(f'Distance: {distance}')
-        logging.info(f'Interval: {interval}')
-        logging.info(f'Speed: {track.speed}')
-        logging.info(f'Course: {track.course}')
-        # logging.info(f'Track timestamp: {track.utm.timestamp}')
-        # logging.info(f'Previous timestamp: {self.timestamp_ptz}')
-        # logging.info(f'VX: {vx}')
-        # logging.info(f'VY: {vy}')
-        # logging.info(f'X: {x}')
-        # logging.info(f'Y: {y}')
-        print('\n')
         
         self.set_to_track_position(bearing,distance, offset)
         

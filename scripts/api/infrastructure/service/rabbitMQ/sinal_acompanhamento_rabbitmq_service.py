@@ -32,7 +32,7 @@ class SinalACompanhamentoCameraRabbitMQService:
             with self.lock:
                 if self.tracks_json is not None:
                     self.channel.basic_publish(exchange=self.exchange, routing_key='', body=self.tracks_json)
-            time.sleep(3)
+            time.sleep(1)
             
     def convert_list(self, tracks_list):
         if self.rabbitmq_data['export']:
