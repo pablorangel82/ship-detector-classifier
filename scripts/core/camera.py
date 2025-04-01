@@ -109,10 +109,10 @@ class Camera:
         z = self.estimate_zoom_factor_by_focal_estimation(distance)
 
         theta = math.atan2(self.installation_height, distance)
-        theta += math.pi
         theta = math.degrees(theta)
         theta += self.ref_elevation
-        theta = theta - 180
+        if theta > 360:
+            theta = theta - 360
 
         t = ((theta - (-90)) / (90 - (-90))) * 2 - 1
 
