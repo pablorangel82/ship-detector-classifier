@@ -10,7 +10,7 @@ color_rect_lost = (235,206,135)
 color_pin = (67, 135, 226)
 min_rect_width = 300
 font_size = 12
-font_type = ImageFont.truetype("resources/arial.ttf", font_size)
+font_type = ImageFont.truetype("core/resources/arial.ttf", font_size)
 show_bb_active_track = True
 
 
