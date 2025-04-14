@@ -2,84 +2,61 @@ from core.camera import Camera
 from core.converter import Converter
 from core.monocular_vision import MonocularVision
 import math
+import unittest
 
-camera_data = {}
-camera_data['id'] = "Unit Test"
-camera_data['address'] = None
-camera_data['latitude'] = -22.912246879883874
-camera_data['longitude'] = -43.15833890364963
-camera_data['reference_azimuth'] = 336
-camera_data['reference_elevation'] = 0
-camera_data['installation_height'] = 16.4
-camera_data['surveillance_radius'] = 3000
-camera_data['focus_frame_view'] = 550
-camera_data['hfov_min'] = 2.1
-camera_data['hfov_max'] = 63.7
-camera_data['zoom_multiplier_min'] = 0
-camera_data['zoom_multiplier_max'] = 30
-camera_data['zoom_lens_min'] = 4.3
-camera_data['zoom_lens_max'] = 129
-camera_data['height_resolution'] = 1080
-camera_data['width_resolution'] = 1920
-camera_data['sensor_width']= 6.42
-camera_data['sensor_height']= 3.1
-camera_data['frame_rate'] = 30
-camera = Camera(camera_data)
+class CameraTest:
+    test_case = unittest.TestCase()
+    camera_data = {}
+    camera_data['id'] = "Unit Test"
+    camera_data['address'] = None
+    camera_data['latitude'] = -22.912246879883874
+    camera_data['longitude'] = -43.15833890364963
+    camera_data['reference_azimuth'] = 336
+    camera_data['reference_elevation'] = 0
+    camera_data['installation_height'] = 16.4
+    camera_data['surveillance_radius'] = 3000
+    camera_data['focus_frame_view'] = 550
+    camera_data['hfov_min'] = 2.1
+    camera_data['hfov_max'] = 63.7
+    camera_data['zoom_multiplier_min'] = 0
+    camera_data['zoom_multiplier_max'] = 30
+    camera_data['zoom_lens_min'] = 4.3
+    camera_data['zoom_lens_max'] = 129
+    camera_data['height_resolution'] = 1080
+    camera_data['width_resolution'] = 1920
+    camera_data['sensor_width']= 6.42
+    camera_data['sensor_height']= 3.1
+    camera_data['frame_rate'] = 30
+    camera = Camera(camera_data)
 
- #new_distance = ((14000 * ) / pixel_height)
-
-def calculate_iou(bb1, bb2):
-    x1_min, y1_min, x1_max, y1_max = bb1
-    x2_min, y2_min, x2_max, y2_max = bb2
-
-    inter_x_min = max(x1_min, x2_min)
-    inter_y_min = max(y1_min, y2_min)
-    inter_x_max = min(x1_max, x2_max)
-    inter_y_max = min(y1_max, y2_max)
-
-    inter_width = max(0, inter_x_max - inter_x_min)
-    inter_height = max(0, inter_y_max - inter_y_min)
-
-    inter_area = inter_width * inter_height
-
-    bb1_area = (x1_max - x1_min) * (y1_max - y1_min)
-    bb2_area = (x2_max - x2_min) * (y2_max - y2_min)
-
-    union_area = bb1_area + bb2_area - inter_area
-
-    iou = inter_area / union_area if union_area > 0 else 0
-    return iou
-
-def test_focal_lengh_calculation(real_height, bbox): 
-    camera.set_to_track_position(60, 3200)
-    x, y, b, d = MonocularVision.monocular_vision_detection_method_2(camera, real_height, bbox)
-    new_position_lat, new_position_lon = Converter.xy_to_geo(x,y)
-    print('Pan: ' + str(camera.pan))
-    print('Zoom: ' + str(camera.zoom))
-    print('Focal (mm): ' + str(camera.focal_length_mm))
-    print('Focal (px): ' + str(camera.focal_length_px))
-    print('HFOV: ' + str(math.degrees(camera.hfov)))
-    print('Dist: ' + str(d))
-    print('Bearing: ' + str(b))
-    print(new_position_lat,new_position_lon)
-
-    #2945.9633125276887
-    #6.274725694444444
-
-def test_polar_to_ptz():
-    camera.interval_measured = 1
-    camera.tracking()
-    print('B: ' + str(camera.bearing))
-    print('PZ: ' + str(camera.zoom_multiplier))
-    print('P: ' + str(camera.pan))
-    print('T: ' + str(camera.tilt))
-    print('Z: ' + str(camera.zoom))
-
-def test_tilt(bearing, distance):
-    camera.set_to_track_position(bearing,distance)
-    print('Bearing: ' + str(camera.bearing))
-    print('Physical Zoom: ' + str(camera.zoom_multiplier))
-    print('Elevation: ' + str(camera.elevation))
-    print('P: ' + str(camera.pan))
-    print('T: ' + str(camera.tilt))
-    print('Z: ' + str(camera.zoom))
+    def test_focal_lengh_calculation(real_height, bbox): 
+        CameraTest.camera.set_to_track_position(60, 3200)
+        x, y, b, d = MonocularVision.monocular_vision_detection_method_2(camera, real_height, bbox)
+        new_position_lat, new_position_lon = Converter.xy_to_geo(x,y)
+        
+    @staticmethod
+    def test_pan():
+        CameraTest.camera.ref_azimuth = 0
+        CameraTest.test_case.assertAlmostEqual(CameraTest.camera.estimate_pan(0), 0.0, places=2)
+        CameraTest.test_case.assertAlmostEqual(CameraTest.camera.estimate_pan(90), 0.5, places=2)
+        CameraTest.test_case.assertAlmostEqual(CameraTest.camera.estimate_pan(180), 1.0, places=2)
+        CameraTest.test_case.assertAlmostEqual(CameraTest.camera.estimate_pan(270), -0.5, places=2)
+        CameraTest.test_case.assertAlmostEqual(CameraTest.camera.estimate_pan(360), 0.0, places=2)
+        CameraTest.camera.ref_azimuth = 30
+        CameraTest.test_case.assertAlmostEqual(round(CameraTest.camera.estimate_pan(0),2), -0.17, places=3)
+        CameraTest.camera.ref_azimuth = 90
+        CameraTest.test_case.assertAlmostEqual(CameraTest.camera.estimate_pan(90), 0, places=2)
+        CameraTest.camera.ref_azimuth = 270
+        CameraTest.test_case.assertAlmostEqual(CameraTest.camera.estimate_pan(180), -0.5, places=2)
+        CameraTest.camera.ref_azimuth = 20
+        CameraTest.test_case.assertAlmostEqual(round(CameraTest.camera.estimate_pan(350),2), -0.17, places=2)
+   
+    @staticmethod
+    def test_tilt():
+        CameraTest.camera.ref_elevation = 0
+        CameraTest.camera.installation_height = 10
+        CameraTest.test_case.assertAlmostEqual(CameraTest.camera.estimate_tilt(0), -1, places=2)
+        CameraTest.test_case.assertAlmostEqual(CameraTest.camera.estimate_tilt(10), -0.5, places=2)
+        CameraTest.test_case.assertAlmostEqual(CameraTest.camera.estimate_tilt(90), -0.07044657495455442, places=2)
+        CameraTest.camera.installation_height = 1
+        CameraTest.test_case.assertAlmostEqual(CameraTest.camera.estimate_tilt(100000), 0, places=2)

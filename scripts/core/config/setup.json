@@ -9,8 +9,8 @@
         "focus_frame_view": 600,
         "reference_azimuth": 336,
         "reference_elevation": 1,
-        "sensor_width": 5.6,
-        "sensor_height": 3.1,
+        "sensor_width": 5.27,
+        "sensor_height": 2.97,
         "zoom_multiplier_min": 0,
         "zoom_multiplier_max": 30,
         "zoom_lens_min": 4.3,
@@ -23,11 +23,10 @@
     },
     "calibration" : {
         "threshold_intersection_detecting": 0.6,
-        "threshold_confidence" : 0.05,
-        "threshold_classification" : 0.02,
+        "threshold_confidence" : 0.2,
+        "threshold_classification" : 0.1,
         "threshold_intersection_tracking": 0.1,
         "train_img_width" : 640,
-        "train_img_height" : 640,
-        "resize": "True"
+        "train_img_height" : 640
     }    
 }

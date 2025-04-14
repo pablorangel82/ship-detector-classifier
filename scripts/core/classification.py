@@ -8,14 +8,13 @@ class Classification:
         self.categories=[]
         self.elected = None
         for i in range(len(Category.CATEGORIES)):
-            confidence_list = [None for element in range(10)]
-            self.categories.append((Category.CATEGORIES[i], 0, 0, None))
+            self.categories.append((Category.CATEGORIES[i], 0, 0))
 
-    def update(self, confidence, category_index, bbox):
+    def update(self, confidence, category_index):
         category = Category.CATEGORIES[category_index]
         votes = self.categories [category_index] [1]
         votes+=1
-        self.categories [category_index] = (category, votes, confidence, bbox)
+        self.categories [category_index] = (category, votes, confidence)
         if self.elected is None or votes > self.elected[1]:
             self.elected = self.categories [category_index]
         self.timestamp = datetime.now()

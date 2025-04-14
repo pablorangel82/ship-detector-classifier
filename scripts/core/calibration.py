@@ -7,4 +7,3 @@ class Calibration:
         self.threshold_intersection_tracking = calibration_data['threshold_intersection_tracking']
         self.train_image_width = calibration_data['train_img_width']
         self.train_image_height = calibration_data['train_img_height']
-        self.resize = calibration_data['resize']

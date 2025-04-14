@@ -113,9 +113,9 @@ def view (frame, tracks, camera):
                 ymin = int(py - (font_size * 1))
                 text_values.append([text_velociy,xmin,ymin,color_text_body])
 
-    text_camera_azimuth =  str(round(camera.bearing,5))
-    text_camera_elevation =  str(round(camera.elevation,5))
-    text_camera_hfov =  str(round(camera.hfov,5))
+    text_camera_azimuth =  str(round(camera.bearing,2))
+    text_camera_elevation =  str(round(camera.elevation,2))
+    text_camera_hfov =  str(round(camera.hfov,2))
     text_ptz = 'P: ' + str(round(camera.pan,2)) + ' T: ' + str(round(camera.tilt,2)) + ' Z: ' + str(round(camera.zoom,2)) 
 
     text_values.append([f'Camera\'s azimuth: {text_camera_azimuth}º', 10, 10, color_text_body])

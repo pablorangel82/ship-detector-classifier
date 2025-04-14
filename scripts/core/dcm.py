@@ -53,14 +53,9 @@ class DCM(Thread):
 
     def detect_and_classify(self, raw_img):
         self.frame_height, self.frame_width, channels = raw_img.shape
-        if self.calibration.resize == "True":
-            img_width = self.calibration.train_image_width
-            img_height = self.calibration.train_image_height
-            img = cv2.resize(raw_img, (img_width, img_height), cv2.INTER_AREA)
-        else:
-            img = raw_img
-            img_width = self.frame_width
-            img_height = self.frame_height
+        img_width = self.calibration.train_image_width
+        img_height = self.calibration.train_image_height
+        img = cv2.resize(raw_img, (img_width, img_height), cv2.INTER_AREA)
         detection_results = self.net_classifier.predict([img],verbose=False,conf=self.calibration.threshold_confidence, iou=self.calibration.threshold_intersection_detecting)
         
         for result in detection_results:
@@ -76,55 +71,20 @@ class DCM(Thread):
                 bbox = [x, y, width, height]
                 self.tracking(confidence, label, bbox)
 
-    def calculate_iou(self,bb1, bb2):
-        x1_min, y1_min, x1_max, y1_max = bb1
-        x2_min, y2_min, x2_max, y2_max = bb2
-
-        inter_x_min = max(x1_min, x2_min)
-        inter_y_min = max(y1_min, y2_min)
-        inter_x_max = min(x1_max, x2_max)
-        inter_y_max = min(y1_max, y2_max)
-
-        inter_width = max(0, inter_x_max - inter_x_min)
-        inter_height = max(0, inter_y_max - inter_y_min)
-
-        inter_area = inter_width * inter_height
-
-        bb1_area = (x1_max - x1_min) * (y1_max - y1_min)
-        bb2_area = (x2_max - x2_min) * (y2_max - y2_min)
-
-        union_area = bb1_area + bb2_area - inter_area
-
-        iou = inter_area / union_area if union_area > 0 else 0
-        return iou
-
     def tracking(self, confidence, label, detected_bbox):
         track_candidate = None
-        best_iou = 0
+        best_iou = None
         action = Listener.EVENT_UPDATE
-
+        iou=None
         with self.control_access_track_list:
             for track in self.tracks_list.values():
-                old_bbox = track.bbox
-                old_x1 = old_bbox[0]
-                old_y1 = old_bbox[1]
-                old_x2 = old_bbox[0] + int(old_bbox[2])
-                old_y2 = old_bbox[1] + int(old_bbox[3])
-                
-                new_x1 = detected_bbox[0]
-                new_y1 = detected_bbox[1]
-                new_x2 = detected_bbox[0] + int(detected_bbox[2])
-                new_y2 = detected_bbox[1] + int(detected_bbox[3])
-                
-                bb1 = (old_x1, old_y1, old_x2, old_y2)
-                bb2 = (new_x1, new_y1, new_x2, new_y2)
-                
-                iou = self.calculate_iou(bb1,bb2)
-                if iou > best_iou:
-                    track_candidate = track
-                    best_iou = iou
+                iou = track.calculate_iou(detected_bbox)
+                if iou >= self.calibration.threshold_intersection_tracking:
+                    if best_iou is None or iou > best_iou:
+                        track_candidate = track
+                        best_iou = iou
 
-            if best_iou < self.calibration.threshold_intersection_tracking:
+            if best_iou is None:
                 track_candidate = Track(self.camera.id)
                 action = Listener.EVENT_CREATE
                
@@ -145,10 +105,10 @@ class DCM(Thread):
             for track in self.tracks_list.values():
                 current_time = datetime.now()
                 k_diff = current_time - track.get_timestamp()
-                if track.lost is False and k_diff.seconds > (5 * self.camera.interval_measured):
+                if track.lost is False and k_diff.seconds > 5:
                     track.lost = True
                     continue
-                if k_diff.seconds > (10 * self.camera.interval_measured):
+                if k_diff.seconds > 10:
                     tracks_to_remove.append(track)
 
             with self.control_access_track_list:

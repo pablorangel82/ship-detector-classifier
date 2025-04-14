@@ -1,7 +1,6 @@
 import uuid
 import core.classification
 from core.kinematic import Kinematic
-from core.monocular_vision import MonocularVision
 from core.converter import Converter
 import core.category
 
@@ -18,10 +17,11 @@ class Track:
         self.bearing = None
         self.distance_from_camera = None
         self.bbox = None
+        self.bbox_to_draw = None
         self.lost = False
-        self.bbox_xy = Kinematic (observation_noise=5)
-        self.bbox_wh = Kinematic (observation_noise=5)
-        self.utm = Kinematic (observation_noise=17)
+        self.bbox_xy = Kinematic (observation_noise=15)
+        self.bbox_wh = Kinematic (observation_noise=15)
+        self.utm = Kinematic (observation_noise=15)
 
     def update(self, detected_bbox, camera, confidence, category_index):
         self.lost = False
@@ -35,21 +35,17 @@ class Track:
         self.utm.delta_t = camera.interval_measured
         self.bbox_xy.update(px, py)
         self.bbox_wh.update(w,h)
-        self.bbox = [px, self.bbox_xy.position[1], self.bbox_wh.position[0], self.bbox_wh.position[1]]
-        
-        self.classification.update(confidence, category_index, self.bbox)
-        
-        air_draught = self.classification.elected[0].max_air_draught
-        detected_bbox [2] = self.classification.elected[3][2]
-        detected_bbox [3] = self.classification.elected[3][3]
-        
-        estimated_x, estimated_y, self.bearing, distance_from_camera = MonocularVision.monocular_vision_detection_method_2(camera, air_draught, detected_bbox)
-        self.utm.update(estimated_x, estimated_y)
-        self.lat, self.lon = Converter.xy_to_geo(estimated_x, estimated_y)
-        x_cam, y_cam = Converter.geo_to_xy(camera.lat, camera.lon)
-        self.distance_from_camera = Converter.euclidian_distance(x_cam,y_cam, self.utm.position[0], self.utm.position[1])
-        self.speed, self.course = Converter.calculate_speed_and_course(self.utm.velocity[0], self.utm.velocity[1])
+        self.bbox = [self.bbox_xy.position[0], self.bbox_xy.position[1], self.bbox_wh.position[0], self.bbox_wh.position[1]]
+        self.bbox_to_draw = [px, self.bbox_xy.position[1], self.bbox_wh.position[0], self.bbox_wh.position[1]]
 
+        self.classification.update(confidence, category_index)
+        air_draught = self.classification.elected[0].max_air_draught
+        x, y, lat, lon, bearing, distance_from_camera = camera.monocular_vision_detection_method_2(air_draught, self.bbox)
+        self.utm.update(x, y)
+        self.lat,self.lon = Converter.xy_to_geo(self.utm.position[0],self.utm.position[1])
+        self.bearing,self.distance_from_camera = Converter.geo_to_polar(camera.lat,camera.lon,self.lat,self.lon)
+        self.speed, self.course = Converter.calculate_speed_and_course(self.utm.velocity[0], self.utm.velocity[1])
+        
     def to_string(self):
         id = self.get_name()
         lat, lon, speed, course, bearing, distance, bbox = self.get_current_kinematic()
@@ -62,11 +58,40 @@ class Track:
         string = string + '\nBearing: ' + str(bearing) + ' - ' + ' Distance: ' + str(distance)
         string = string + '\nBbox: ' + str(bbox)
         return string
+    
+    def calculate_iou(self, detected_bbox):
+        x1_min = self.bbox[0]
+        y1_min = self.bbox[1]
+        x1_max = self.bbox[0] + int(self.bbox[2])
+        y1_max = self.bbox[1] + int(self.bbox[3])
+        
+        x2_min = detected_bbox[0]
+        y2_min = detected_bbox[1]
+        x2_max = detected_bbox[0] + int(detected_bbox[2])
+        y2_max = detected_bbox[1] + int(detected_bbox[3])
+        
+        inter_x_min = max(x1_min, x2_min)
+        inter_y_min = max(y1_min, y2_min)
+        inter_x_max = min(x1_max, x2_max)
+        inter_y_max = min(y1_max, y2_max)
+
+        inter_width = max(0, inter_x_max - inter_x_min)
+        inter_height = max(0, inter_y_max - inter_y_min)
+
+        inter_area = inter_width * inter_height
+
+        bb1_area = (x1_max - x1_min) * (y1_max - y1_min)
+        bb2_area = (x2_max - x2_min) * (y2_max - y2_min)
+
+        union_area = bb1_area + bb2_area - inter_area
+
+        iou = inter_area / union_area if union_area > 0 else 0
+        return iou
 
     def get_current_kinematic(self):
         if self.utm is None or self.bbox is None or self.lat is None or self.lon is None:
             return None, None, None, None, None, None, None
-        return self.lat, self.lon, self.speed, self.course, self.bearing, self.distance_from_camera, self.bbox
+        return self.lat, self.lon, self.speed, self.course, self.bearing, self.distance_from_camera, self.bbox_to_draw
 
     def get_name(self):
         name = self.name

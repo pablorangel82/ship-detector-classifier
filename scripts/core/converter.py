@@ -8,8 +8,8 @@ class Converter():
         x = math.sin(math.radians(theta)) * r
         y = math.cos(math.radians(theta)) * r
         if ref_x is not None and ref_y is not None:
-            x = x + ref_x
-            y = y + ref_y
+            x = ref_x + x
+            y = ref_y + y
         return x, y
 
     @staticmethod
@@ -27,10 +27,13 @@ class Converter():
     @staticmethod
     def xy_to_polar(ref_x, ref_y, x, y):
         if ref_x is None or ref_y is None:
-            ref_x = 0
-            ref_y = 0
-        r = math.sqrt(math.pow(x - ref_x, 2) + math.pow(y - ref_y, 2))
-        theta = math.degrees(math.atan2(ref_x + x, ref_y + y)) 
+            dx = x
+            dy = y
+        else:
+            dx = x - ref_x
+            dy = y - ref_y
+        r = math.sqrt(math.pow(dx, 2) + math.pow(dy, 2))
+        theta = math.degrees(math.atan2(dx, dy)) 
         theta = (theta + 360) % 360 
         return theta, r
 

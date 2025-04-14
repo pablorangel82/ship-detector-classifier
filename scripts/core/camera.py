@@ -92,41 +92,57 @@ class Camera:
         lat, lon = Converter.xy_to_geo(track.utm.position[0],track.utm.position[1])
         bearing, distance = Converter.geo_to_polar(self.lat,self.lon,lat,lon)
         
-        logging.info(f'Bearing: {bearing}')
-        logging.info(f'Distance: {distance}')
-        logging.info(f'Interval: {interval}')
-        logging.info(f'Track timestamp: {track.utm.timestamp}')
-        logging.info(f'Previous timestamp: {self.timestamp_ptz}')
-        
         self.set_to_track_position(bearing,distance)
-        
-    def set_to_track_position(self, bearing, distance):
-        p = 0
-        t = 0
-        z = 0
-   
-        
-        z = self.estimate_zoom_factor_by_focal_estimation(distance)
+    
 
+    def estimate_tilt(self, distance):
         theta = math.atan2(self.installation_height, distance)
         theta = math.degrees(theta)
         theta += self.ref_elevation
-        if theta > 360:
-            theta = theta - 360
-
-        t = ((theta - (-90)) / (90 - (-90))) * 2 - 1
-
+        theta = theta % 360
+        t = -((theta + 90) / 180 * 2 - 1)
         self.elevation = t * 90
+        return t
+
+    def estimate_pan(self, bearing):
         self.bearing = bearing
         bearing = bearing + (360 - self.ref_azimuth)
         
         if bearing >= 360:
             bearing = bearing - 360
         
-        if bearing < 180:
+        if bearing <= 180:
             p = bearing / 180
         else:
             p = ((360 - bearing) / 180) * -1
+        
+        return p
+
+    def estimate_zoom_factor_survaillance_radius(self,distance):
+        if (self.installation_height + distance) > self.surveillance_radius:
+            self.zoom_multiplier = self.zoom_multiplier_max
+        else:
+            self.zoom_multiplier = ((self.installation_height + distance) / self.surveillance_radius) * self.zoom_multiplier_max
+        z  = (self.zoom_multiplier - self.zoom_multiplier_min) / (self.zoom_multiplier_max - self.zoom_multiplier_min)
+        return z
+
+    def estimate_zoom_factor_by_focal_estimation(self, distance):
+        if distance <=0 :
+            return 0
+        scene_width = self.focus_frame_view * 0.2645833333
+        theta = 2 * math.atan(scene_width / (2 * distance))
+        required_focal_length_mm = self.sensor_width / (2 * math.tan(theta / 2))
+        z = required_focal_length_mm / self.zoom_lens_max
+        return z
+    
+    def set_to_track_position(self, bearing, distance):
+        p = 0
+        t = 0
+        z = 0
+        
+        z = self.estimate_zoom_factor_by_focal_estimation(distance)
+        t = self.estimate_tilt(distance)
+        p = self.estimate_pan(bearing)
         
         self.set_ptz(p,t,z)
 
@@ -173,20 +189,35 @@ class Camera:
         self.hfov = self.hfov_min + ((self.hfov_max - self.hfov_min) * (1-zoom))
         self.focal_length_px = (self.focal_length_mm * self.height_resolution) / self.sensor_height
 
-    def estimate_zoom_factor_survaillance_radius(self,distance):
-        if (self.installation_height + distance) > self.surveillance_radius:
-            self.zoom_multiplier = self.zoom_multiplier_max
+    def monocular_vision_detection_method_1(self, alpha, bearing, height):
+        if alpha == 0:
+            return b,math.nan
+        if alpha <= 90:
+            alpha = 90 - alpha
         else:
-            self.zoom_multiplier = ((self.installation_height + distance) / self.surveillance_radius) * self.zoom_multiplier_max
-        zoom_factor  = (self.zoom_multiplier - self.zoom_multiplier_min) / (self.zoom_multiplier_max - self.zoom_multiplier_min)
-        return zoom_factor
-
-    def estimate_zoom_factor_by_focal_estimation(self, distance):
-        if distance <=0 :
-            return 0
-        scene_width = self.focus_frame_view * 0.2645833333
-        theta = 2 * math.atan(scene_width / (2 * distance))
-        required_focal_length_mm = self.sensor_width / (2 * math.tan(theta / 2))
-        zoom_factor = required_focal_length_mm / self.zoom_lens_max
-        return zoom_factor
+            if alpha <= 180:
+                alpha = 180 - alpha
+            else:
+                if alpha < 270:
+                    alpha = 270 - alpha
+                else:
+                    alpha = 360 - alpha
+        alpha = math.radians(alpha)
+        d=  height / math.tan(alpha)
+        b = bearing
+        return b,d
     
+    def monocular_vision_detection_method_2(self, real_height, detected_bbox):
+        pixel_width = detected_bbox[2]
+        pixel_height = detected_bbox[3]
+        x_center_pixel = detected_bbox[0] + (pixel_width / 2)
+        x_center_frame = self.width_resolution / 2
+        fator = (x_center_pixel - x_center_frame) / (self.width_resolution / 2)
+        diff_degrees = fator * (self.hfov / 2)
+        new_bearing = (self.bearing + diff_degrees) % 360
+        new_distance = ((real_height * self.focal_length_px) / pixel_height)
+        new_distance = (new_distance / 1000)  # mm to m
+        cam_x, cam_y = Converter.geo_to_xy(self.lat, self.lon)
+        new_position_x, new_position_y = Converter.polar_to_xy(cam_x, cam_y, new_bearing, new_distance)
+        lat, lon = Converter.xy_to_geo(new_position_x,new_position_y)
+        return new_position_x,new_position_y, lat, lon, new_bearing, new_distance
