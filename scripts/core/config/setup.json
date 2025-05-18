@@ -1,16 +1,16 @@
 {
     "camera" : {
         "id": "EN",
-        "address": "core/samples/sample.mp4",
+        "address": "core/samples/passenger_ship_02.mp4",
         "latitude": -22.912759833,
         "longitude": -43.1582615,
-        "installation_height": 16.4,
-        "surveillance_radius": 3000,
-        "focus_frame_view": 600,
-        "reference_azimuth": 336,
-        "reference_elevation": 1,
-        "sensor_width": 5.27,
-        "sensor_height": 2.97,
+        "installation_height": 30,
+        "surveillance_radius": 2800,
+        "focus_frame_view": 350,
+        "reference_azimuth": 338.5,
+        "reference_elevation": -3.2,
+        "sensor_width_lens": 5.6,
+        "sensor_height_lens": 3.1,
         "zoom_multiplier_min": 0,
         "zoom_multiplier_max": 30,
         "zoom_lens_min": 4.3,
@@ -18,8 +18,8 @@
         "hfov_min": 2.1,
         "hfov_max": 63.7,
         "frame_rate": 30,
-        "width_resolution": 1920,
-        "height_resolution": 1080
+        "sensor_width_resolution": 1920,
+        "sensor_height_resolution": 1080
     },
     "calibration" : {
         "threshold_intersection_detecting": 0.6,
@@ -28,5 +28,5 @@
         "threshold_intersection_tracking": 0.1,
         "train_img_width" : 640,
         "train_img_height" : 640
-    }    
+    }      
 }

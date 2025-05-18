@@ -14,10 +14,12 @@ class Classification:
         category = Category.CATEGORIES[category_index]
         votes = self.categories [category_index] [1]
         votes+=1
+        if confidence < self.categories [category_index][2]:
+            confidence = self.categories [category_index][2]
         self.categories [category_index] = (category, votes, confidence)
         if self.elected is None or votes > self.elected[1]:
             self.elected = self.categories [category_index]
         self.timestamp = datetime.now()
-            
+        
     def to_string(self):
         return (self.elected[0].name).upper() + ' - ' + str(round(self.elected[2]*100,2)) + '%'

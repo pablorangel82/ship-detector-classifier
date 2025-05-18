@@ -12,8 +12,8 @@ class Category():
         self.source_key = source_key
    
     @staticmethod
-    def load_categories(version, language):
-        module_name = "categories.category_"+version+"_"+language
+    def load_categories(language):
+        module_name = "categories.category_"+language
         module = importlib.import_module(module_name)
         categories_list = getattr(module, "categories", None)
         for json_obj in categories_list:

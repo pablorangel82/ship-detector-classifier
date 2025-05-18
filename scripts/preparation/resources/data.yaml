@@ -1,3 +1,4 @@
+path: D:\dataset
 train: train/
 val: val/
 test: test/
@@ -9,3 +10,5 @@ names: [
   "Fire Fighting Vessels", "Patrol Vessels","Platforms","Standby Safety Vessels","Combat Vessels","Training Ships",
   "Icebreakers", "Replenishment Vessels","Tankers","Fishing Vessels","Supply Vessels","Carrier Floating","Dredgers"
  ]
+
+weights: [0.301487043, 0.213365087, 0.958510752, 0.681738283, 1.224754275, 0.411616336, 1.15361438, 1.013335143, 1.079187646, 9.427759655, 10.24025603, 6.050651719, 5.359014236, 8.476866307, 5.66285317, 13.64691546, 5.62128247, 26.40495137, 10.48963822, 15.04736312, 12.43987781, 0.254399864, 0.465214818, 0.764978611, 3.117002401, 2.701564997]

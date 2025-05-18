@@ -3,7 +3,7 @@ from core.viewer import view
 import cv2
 
 
-dcm = DCM('core/config/setup', 'v1', 'en')
+dcm = DCM('core/config/setup', 'en')
 dcm.start()
 dcm.camera.set_to_track_position(45,2500)
 while True:

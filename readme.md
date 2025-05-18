@@ -1,69 +1,159 @@
-# Environment Preparation
+# A New Approach for Vessel Detection, Classification and Estimation Using Monocular Vision
 
-- Install Python 3.10.11 and allow the installer to automatically set the "Python PATH.";
-- Update NVIDIA® GPU drivers to version 450.80.02 or higher if you wnat GPU support;
-- Execute the `create-env` script using your operating system shell.
+This repository provides tools and instructions to prepare, build, use, and evaluate the **VESSA Dataset** and associated models for vessel detection, classification, and tracking using monocular vision.
 
 ---
 
-# Downloading and Building the Dataset
+## 🔧 Environment Preparation
 
-- Run the Python script `_run_preparation.py_.` This process includes three steps: downloading, labeling, and viewing. To skip any of these steps, simply comment out the corresponding function call in `_run_preparation.py_.`  
-- The script `dataset_config.py` contains all parameters. You can modify settings such as the download folder, dataset folder, and labeling parameters.  
-- **Note**: Downloading the dataset requires significant storage space (approximately 1TB). To save space, you can automatically resize photos by setting the `_auto_resize_` parameter to `True` when calling the `download` function.  
-- It is recommended to set the `_start_again_` parameter to `False.` If set to `True,` all previously downloaded data will be discarded.  
-- Automating the labeling process may take several hours and could result in precision and accuracy errors. However, we provide annotations that have been carefully reviewed by human experts. By default, the `label` function call is disabled.  
-- You can display all images and bounding boxes. This is an auxiliary tool designed for functionality rather than user experience.
+1. Install **Python 3.12** and allow the installer to automatically set the Python PATH.
+2. Update **NVIDIA® GPU drivers** to version **450.80.02 or higher** if you want GPU support.
+3. If you're using **Linux**, you can execute the `create-env` script using your system shell.
 
 ---
 
-# Customizing Video Parameters, Running the Model, and Viewing Results
+## 🧱 If you want to build the VESSA Dataset from Scratch.. 
 
-- Ensure you have a JSON file containing calibration and camera parameters located in the `_config_` folder. The filename must be specified in the `run_model.py` script.  
-- The `DCM` constructor requires the name of the JSON file containing camera and model parameters. An example JSON file, `_setup.json_,` is provided for reference.  
+1. Run the script:  
+   ```bash
+   python _run_preparation.py_
+   ```
+   This script includes four main steps:
+   - Downloading
+   - Labeling
+   - Statistics collection
+   - Viewing
 
-### Example JSON Structure  
+   To skip any step, simply comment out the corresponding function call in `_run_preparation.py_`.
 
+2. Customize dataset paths and parameters in `dataset_config.py`.
+
+3. Notes:
+   - **Storage:** Downloading the dataset may require **~1 TB**.
+   - To save space, set the `_auto_resize_` parameter to `True` when calling the `download` function.
+   - It is **recommended to set `_start_again_` to `False`** to avoid losing previously downloaded data.
+   - The automatic labeling process is slow and may have errors; however, **verified annotations by human experts** are provided. By default, labeling is **disabled**.
+   - The manual labeling required the redistribution of the samples with `distribute.py` script.
+
+4. You can visualize all images and their bounding boxes (auxiliary tool, not UX-oriented).
+
+---
+
+## ⬇️ Downloading the Ready-to-Use Dataset
+
+- Visit the official [ZENODO page](https://zenodo.org/) and download the `.zip` file.
+- Unzip the file into a local folder of your choice.
+
+---
+
+## 🧪 Reproducing Evaluation Results
+
+1. Download the dataset as described above.
+2. Copy all folders from the second schema to the `evaluation/tmm` folder.
+3. Run the evaluation:
+   ```bash
+   python run_trials.py
+   ```
+
+---
+
+## 📹 Using the Model on Custom Videos or Live Streams
+
+1. Ensure your `_config_` folder contains a JSON file with camera parameters.
+2. Specify this file in `run_model.py`.
+3. If you want to use translated category names or different dimensions, create a new file and place it in the the `categories` folder. Then, specify the correct filename in `run_model.py`, passing it to the DCM constructor.
+
+### JSON Example (`_setup.json_`)
 ```json
 {
-    "camera": {
-        "id":"EN",
-        "address": "../../report/samples/barca.mp4",
-        "latitude": -22.912759833,
-        "longitude": -43.1582615,
-        "standard_bearing": 336,
-        "zoom_min": 0,
-        "zoom_max": 30,
-        "hfov_min": 2.1,
-        "hfov_max": 63.7,
-        "tilt_range": 350,
-        "pan_range": 360,
-        "frame_rate": 30,
-        "width_resolution": 1920,
-        "height_resolution": 1080
-    },
-    "calibration": {
-        "threshold_intersection": 0.6,
-        "threshold_confidence": 0.05,
-        "threshold_classification": 0.1,
-        "train_img_width": 640,
-        "train_img_height": 640,
-        "resize": "True"
-    }
+  "camera": {
+    "id": "EN",
+    "address": "core/samples/passenger_ship_02.mp4",
+    "latitude": -22.912759833,
+    "longitude": -43.1582615,
+    "installation_height": 30,
+    "surveillance_radius": 2800,
+    "focus_frame_view": 350,
+    "reference_azimuth": 338.5,
+    "reference_elevation": -3.2,
+    "sensor_width_lens": 5.6,
+    "sensor_height_lens": 3.1,
+    "zoom_multiplier_min": 0,
+    "zoom_multiplier_max": 30,
+    "zoom_lens_min": 4.3,
+    "zoom_lens_max": 129,
+    "hfov_min": 2.1,
+    "hfov_max": 63.7,
+    "sensor_width_resolution": 1920,
+    "sensor_height_resolution": 1080
+  },
+  "calibration": {
+    "threshold_intersection_detecting": 0.6,
+    "threshold_confidence": 0.2,
+    "threshold_classification": 0.1,
+    "threshold_intersection_tracking": 0.1,
+    "train_img_width": 640,
+    "train_img_height": 640
+  }
 }
 ```
 
-### Key Parameters  
+### Key Parameters
 
-- **`id`**: The identification of video streaming. The generated tracks will have their IDs based on this string. 
-- **`address`**: The RTSP address or the local file path containing the video to be used by the model.  
-- **`latitude` and `longitude`**: The geographic coordinates of the stationary camera.  
-- **`standard_bearing`**: The default bearing of the camera installation, based on the polar coordinate system. This value is used to adjust vessel bearing estimations.  
-- **`hfov`, `tilt_range`, and `pan_range`**: The physical characteristics of the camera.  
-- **`frame_rate`, `width_resolution`, and `height_resolution`**: The video stream settings.  
-- **`threshold_intersection` and `threshold_confidence`**: YOLO configuration parameters.  
-- **`threshold_classification`**: The minimum confidence value required to classify a result as anything other than "Unknown."  
-- **`train_img_width` and `train_img_height`**: The dimensions of the images used to train the model.  
-- **`resize`**: Indicates whether to resize images for detection and classification.
+- **`id`**: Unique identifier for video source (used in output file naming).
+- **`address`**: RTSP stream or path to local video file.
+- **`latitude` / `longitude`**: Camera installation coordinates.
+- **`installation_height`**: Camera height from sea level, used for tilt and zoom calculations.
+- **`surveillance_radius`**: Range of camera coverage, used for zoom calculation (optional).
+- **`focus_frame_view`**: Pixel width for vessel framing — **default zoom method**.
+- **`reference_azimuth` / `reference_elevation`**: Camera orientation in degrees.
+- **Sensor parameters**: Accurate lens dimensions and sensor resolutions are required for kinematic estimation:
+  - `sensor_width_lens`, `sensor_height_lens`
+  - `sensor_width_resolution`, `sensor_height_resolution`
+  - `hfov_min`, `hfov_max`
+- **Calibration parameters**: YOLO thresholds and training image size:
+  - `threshold_intersection_detecting`
+  - `threshold_confidence`
+  - `threshold_classification`
+  - `train_img_width`, `train_img_height`
+- **Optional**: `resize` flag to adjust image sizes during processing.
 
-The `DCM` constructor also requires the language of the Python script containing translated vessel categories. All files must follow the naming convention `_category_<language>.py_.`
+---
+
+## 📂 Repository Structure
+
+```
+.
+├── env/
+|   └── requirements.txt   
+|   └── linux/
+|       └── create-env.sh
+├── categories/
+│   └── category_en.py
+├── scripts
+|   └── core/
+|       └── config/
+│           └── setup.json
+│       └── samples/
+│       └── models/
+|           └── model.pt
+|       └── evaluation/
+│           └── trials/ 
+│               └── dcm/            
+│               └── tmm/
+|       └── preparation/
+|           └── resources
+|               └── data.yaml
+|               └── eni.dat
+|       └── scripts/
+|           └── run_preparation.py_
+|           └── run_model.py_
+|           └── run_trials.py_
+└── README.md
+```
+
+---
+
+## 🧠 Citation
+
+If you use the VESSA Dataset or the model in academic work, please cite the original paper (to be added here).

@@ -11,7 +11,7 @@ color_pin = (67, 135, 226)
 min_rect_width = 300
 font_size = 12
 font_type = ImageFont.truetype("core/resources/arial.ttf", font_size)
-show_bb_active_track = True
+show_bb_active_track = False
 
 
 def deg_to_dms(deg, coord_type='lat'):
@@ -61,10 +61,10 @@ def view (frame, tracks, camera):
                 else:
                     speed = 0
                     course = '-'
-            else:
-                if speed > 40:
-                    speed='-'
-                    course='-'
+            # else:
+            #     if speed > 40:
+            #         speed='-'
+            #         course='-'
             text_velociy = 'Speed: ' + str(speed) + " KT" + "   Course: " + str(course) + " º" 
             text_geopos = 'Geo Position: ' + deg_to_dms(lat,'lat') + '    ' + deg_to_dms (lon,'lon')
             text_polar = 'Bearing: ' + str(bearing) + ' º' + '    Distance from camera: ' + str(dist) + ' km'
@@ -88,7 +88,7 @@ def view (frame, tracks, camera):
                 image = cv2.rectangle(image, (px,py), (px+w,py+h), color_rect_active,1)
                 text_title = '[' + str(px)+','+str(py) + ',' + str(w) + ',' + str(h) + ']'
                 text_values.append([text_title,px,py-20,color_rect_active])
-                text_title = track.classification.to_string()
+            text_title = track.classification.to_string()
             xmin = int(px + (w/4))
             ymin = int(py - (font_size * 5))
             rect_width = (font_size * len(text_title) * 0.6)+2

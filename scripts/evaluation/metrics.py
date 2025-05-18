@@ -1,152 +1,95 @@
-from core.category import Category
-from evaluation.kem_evaluation import KEMEvaluation
-from evaluation.dcm_evaluation import DCMEvaluation
-from preparation.dataset_config import DatasetConfig
 import math
-import numpy as np
-import os
 import logging
 
 class Metric:
+    def __init__(self):
+        self.tps = []
+        self.tns = []
+        self.fps = []
+        self.fns = []
+        self.accs = []
+        self.precs = []
+        self.recalls= []
+        self.f1s = []
+        self.total_tp = 0
+        self.total_tn = 0
+        self.total_fp = 0
+        self.total_fn = 0
+        self.acc = 0
+        self.precision = 0
+        self.recall = 0
+        self.f1 = 0
+        self.mcc = 0
 
-    INTERVAL = 0.03
-
-    def show_detection_and_classification_metrics(self):
-        tps = []
-        tns = []
-        fps = []
-        fns = []
-        dim = len(self.confusion_matrix[0])
-        logging.info('\nSummary Table')
-        logging.info(self.mcc_table)
+    def typical_classification_metrics(self, categories, confusion_matrix):
+        self.tps.clear()
+        self.tns.clear()
+        self.fps.clear()
+        self.fns.clear()
+        self.accs.clear()
+        self.precs.clear()
+        self.recalls.clear()
+        self.total_tp = 0
+        self.total_tn = 0
+        self.total_fp = 0
+        self.total_fn = 0
+        self.acc = 0
+        self.precision = 0
+        self.recall = 0
+        self.f1 = 0
+        self.mcc = 0
+        dim = len(confusion_matrix[0])
         for i in range(dim):
             tp = 0
             for j in range(dim):
                 if i == j:
-                    tps.append(self.confusion_matrix[i][j])
+                    self.tps.append(confusion_matrix[i][j])
                     tnsc = 0
                     for k in range(dim):
                         for l in range(dim):
                             if k != i and l != j:
-                                tnsc += self.confusion_matrix[k][l]
-                    tns.append(tnsc)
+                                tnsc += confusion_matrix[k][l]
+                    self.tns.append(tnsc)
                     fnsc = 0
                     for k in range(dim):
                         if k != i:
-                            fnsc += self.confusion_matrix[i][k]
-                    fns.append(fnsc)
+                            fnsc += confusion_matrix[i][k]
+                    self.fns.append(fnsc)
                     fpsc = 0
                     for k in range(dim):
                         if k != j:
-                            fpsc += self.confusion_matrix[k][j]
-                    fps.append(fpsc)
-        logging.info("\nConfusion Matrix")
-        logging.info(self.confusion_matrix)
-        logging.info('\nDetection and Classification Results')
+                            fpsc += confusion_matrix[k][j]
+                    self.fps.append(fpsc)
+        
+        
+        
         for i in range(dim):
-            acc = self.metric_acc(tps[i], fps[i], fns[i], tns[i])
-            acc = round(acc * 100,2)
-            precision = self.metric_precision(tps[i], fps[i])
-            precision = round(precision * 100, 2)
-            recall = self.metric_true_positive_rate(tps[i], fns[i])
-            recall = round(recall * 100, 2)
+            acc = self.metric_acc(self.tps[i], self.fps[i], self.fns[i], self.tns[i])
+            self.accs.append (round(acc * 100,2))
+            precision = self.metric_precision(self.tps[i], self.fps[i])
+            self.precs.append(round(precision * 100, 2))
+            recall = self.metric_true_positive_rate(self.tps[i], self.fns[i])
+            self.recalls.append(round(recall * 100, 2))
             f1 = self.metric_f1(precision, recall)
-            f1 = round(f1, 2)
-
-            logging.info('\nClass ' + str(i))
-            logging.info('\nTrue Positives: ' + str(tps[i]))
-            logging.info('\nTrue Negatives: ' + str(tns[i]))
-            logging.info('\nFalse Positives: ' + str(fps[i]))
-            logging.info('\nFalse Negatives: ' + str(fns[i]))
-            logging.info('\nAccuracy: ' + str(acc))
-            logging.info('\nPrecision: ' + str(precision))
-            logging.info('\nRecall: ' + str(recall))
-            logging.info('\nF1 Score: ' + str(f1))
-
-        total_tp = self.sum_vector(tps)
-        total_fp = self.sum_vector(fps)
-        total_fn = self.sum_vector(fns)
-        total_tn = self.sum_vector(tns)
-
-        logging.info('\nOverall metrics')
-        acc= self.metric_acc(total_tp, total_fp, total_fn, total_tn)
-        acc = round(acc * 100, 2)
-        logging.info('Accuracy: ' + str(acc))
-
-        precision = self.metric_precision(total_tp, total_fp)
-        precision = round(precision * 100, 2)
-        logging.info('Precision:' + str(precision))
-
-        recall = self.metric_true_positive_rate(total_tp, total_fn)
-        recall = round(recall * 100, 2)
-        logging.info('Recall: ' + str(recall))
-
-        f1 = self.metric_f1(precision, recall)
-        f1 = round(f1, 2)
-        logging.info('F1 Score:' + str(f1) )
-
-        mcc = round (self.metric_mcc(self.mcc_table),2)
-        logging.info('MCC:' + str(mcc) )
-
-    def show_estimation_metrics(self):    
-        results = self.kem_evaluations.mse_overall_results
-        logging.info('\nMSE Evaluations:')
-        for reg in results:
-            logging.info('\n MSE - Position and Velocity')
-            logging.info('\n Timestamp: ' + str(reg[0]))
-            estimated_lat, estimated_lon, estimated_speed, estimated_course = reg[1]
-            gt_lat, gt_lon, gt_speed, gt_course = reg[2]
-            logging.info('Est: ' + str(estimated_lat) + ', ' + str(estimated_lon))
-            logging.info('GT: ' + str(gt_lat) + ', ' + str(gt_lon))
-            logging.info('Est. Speed: ' + str(estimated_speed) + ' ' + 'Course: ' + str(estimated_course))
-            logging.info('GT. Speed: ' + str(gt_speed) + ' ' + 'Course: ' + str(gt_course))
-            logging.info('\n RMSE Position: ' + str(reg[3]))
-            logging.info('\n RMSE Velocity: ' + str(reg[4]))
-
-    def compute_metrics_dcm(self):
-        versions = ['v1','v2','v3']
-        list_versions_categories = []
-        list_versions_categories.append(Category.load_categories(versions[0],'en'))
-        #list_versions_categories.append(self.load_categories(versions[1],'en'))
-        #list_versions_categories.append(self.load_categories(versions[2],'en'))
-        for k in range(len(list_versions_categories)):
-            logging.info('Testing DCM for dataset version ' + str(k+1))
-            categories = list_versions_categories[k]
-            self.confusion_matrix = np.zeros((len(categories)-1,len(categories)-1), dtype=np.int64) 
-            self.mcc_table  = np.zeros((len(categories),3), dtype=np.int64)
-            test_images_path = os.path.join(DatasetConfig.DATASET_FOLDER,"test/images")
-            test_labels_path = os.path.join(DatasetConfig.DATASET_FOLDER,"test/labels_"+versions[k])
-            logging.info('Preparing model... ')
-            dcm_eval = DCMEvaluation(self.confusion_matrix,self.mcc_table)
-            logging.info("Evaluating DCM... ")
-            dcm_eval.evaluate(test_images_path,test_labels_path,versions[k])
-            logging.info('Showing metrics...')
-            self.show_detection_and_classification_metrics()
-
-    def compute_metrics_kem(self, category, test_case):
-        versions = ['v1','v2','v3']
-        list_versions_categories = []
-        list_versions_categories.append(Category.load_categories(versions[0],'en'))
-        # list_versions_categories.append(self.load_categories(versions[1],'en'))
-        # list_versions_categories.append(self.load_categories(versions[2],'en'))
-        
-        
-        for k in range(len(list_versions_categories)):
-            logging.info('Testing KEM for dataset version ' + str(k+1))
-            categories = list_versions_categories[k]
-            self.confusion_matrix = np.zeros((len(categories),len(categories)), dtype=np.int64) 
-            self.mcc_table  = np.zeros((len(categories),3), dtype=np.int64)
-            logging.info('Preparing model for testing category ' + str(category))
-            kem_eval = KEMEvaluation(category, self.confusion_matrix, self.mcc_table, Metric.INTERVAL)
-            self.kem_evaluations = kem_eval
+            self.f1s.append(round(f1*100, 2))
             
-            logging.info('Evaluating category ' + str(category))
-            trial = 'evaluation/trials/'+str(category)+"_"+str(test_case)+'/'
-            logging.info("Evaluating KEM... ")
-            kem_eval.evaluate(trial,versions[k])
-            logging.info('Showing metrics...')
-           # self.show_detection_and_classification_metrics()
-            self.show_estimation_metrics()    
+            result = categories[i].name + ' & ' +  str(acc) + ' & ' +  str(precision) + ' & ' +  str(recall) + ' & ' +  str(f1) + ' \\\\'
+           #logging.info(result)
+
+        total_tp = self.sum_vector(self.tps)
+        total_fp = self.sum_vector(self.fps)
+        total_fn = self.sum_vector(self.fns)
+        total_tn = self.sum_vector(self.tns)
+
+        acc= self.metric_acc(total_tp, total_fp, total_fn, total_tn)
+        self.acc = round(acc * 100, 2)
+        precision = self.metric_precision(total_tp, total_fp)
+        self.precision = round(precision * 100, 2)
+        recall = self.metric_true_positive_rate(total_tp, total_fn)
+        self.recall = round(recall * 100, 2)
+        f1 = self.metric_f1(precision, recall)
+        self.f1 = round(f1*100, 2)
+
 
     def true_negative_rate(self, tn, fp):
         if (tn + fp) == 0:
@@ -203,8 +146,17 @@ class Metric:
             s = s + (table[i][col1] * table[i][col2])
         return s
 
+    def metric_binary_mcc(self,tp, tn, fp, fn):
+        num = tp * tn - fp * fn
+        den = int((tp+fp)*(tp+fn)*(tn+fp)*(tn+fn))
+        if den <= 0:
+            return -1
+        den = math.sqrt(den)
+        mcc = num/den
+        self.mcc = round(mcc,2)
+        return mcc
 
-    def metric_mcc(self,table):
+    def metric_multiclass_mcc(self,table):
         s = self.sum(table, 0)
         c = self.sum(table, 2)
         tp = self.sum_prod(table, 0, 1)
@@ -218,4 +170,35 @@ class Metric:
         if den == 0:
             return -1
         mcc = num / den
+        self.mcc = round (mcc,2)
         return mcc      
+    
+    def values_bellow_percentile(self, data, p):
+        if not data:
+            return []
+        
+        data_sorted = sorted(data)
+        n = len(data_sorted)
+        rank = p / 100 * (n - 1)
+        lower = int(rank)
+        upper = min(lower + 1, n - 1)
+        weight = rank - lower
+        threshold = data_sorted[lower] * (1 - weight) + data_sorted[upper] * weight
+
+        return [x for x in data if x < threshold]
+    
+    def rmse(self,list):
+        if list is None or len(list) == 0:
+            return 0
+        sum = 0
+        for value in list:
+            sum+=value
+        return sum/len(list)
+    
+    def med(self,list):
+        med = 0
+        if len(list) % 2 == 1:
+            med = list [int(len(list)/2)]
+        else:
+            med = (list [(int(len(list)/2))+1] + list [int(len(list)/2)]) /2   
+        return math.sqrt(med)

@@ -10,15 +10,13 @@ from threading import Thread, Semaphore
 from core.category import Category
 from core.calibration import Calibration
 from core.camera import Camera
-from core.track import Track
-from core.listener import Listener
+from core.tmm import Track
 from core.category import Category
 
 class DCM(Thread):
 
-    def __init__(self, config_path, version, language):
+    def __init__(self, config_path, language):
         Thread.__init__(self)
-        self.listener = None
         self.tracks_list = {}
         self.control_access_track_list = Semaphore(1)
         json_file = open(config_path+'.json')
@@ -26,14 +24,14 @@ class DCM(Thread):
         camera_data = config_data['camera']
         calibration_data = config_data['calibration']
         self.calibration = Calibration(calibration_data)
-        Category.load_categories(version, language)
+        Category.load_categories(language)
         count = torch.cuda.device_count()
         print('Number of GPUs: ' + str(count))
         device = 'cpu'
         if torch.cuda.is_available():
             print('CUDA ENABLED')
             device = 'cuda:0'
-        model_path = os.path.join('core/models/',version+".pt")
+        model_path = os.path.join('core/models/',"model.pt")
         self.net_classifier = YOLO(model_path).to(device)
         self.net_classifier.conf = self.calibration.threshold_confidence
         self.net_classifier.iou = self.calibration.threshold_intersection_detecting
@@ -74,7 +72,6 @@ class DCM(Thread):
     def tracking(self, confidence, label, detected_bbox):
         track_candidate = None
         best_iou = None
-        action = Listener.EVENT_UPDATE
         iou=None
         with self.control_access_track_list:
             for track in self.tracks_list.values():
@@ -86,7 +83,6 @@ class DCM(Thread):
 
             if best_iou is None:
                 track_candidate = Track(self.camera.id)
-                action = Listener.EVENT_CREATE
                
             if confidence < self.calibration.threshold_classification:
                 confidence = 1
@@ -94,9 +90,6 @@ class DCM(Thread):
 
             track_candidate.update(detected_bbox,self.camera,confidence, int(label))
             self.tracks_list[track_candidate.uuid] = track_candidate
-
-        if self.listener is not None:
-            self.listener.receive_evt(None,copy.deepcopy(track_candidate), action)
         return track_candidate
 
     def run(self):

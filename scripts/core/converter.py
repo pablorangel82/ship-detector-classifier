@@ -64,5 +64,5 @@ class Converter():
 
     @staticmethod
     def calculate_speed_and_course(vx, vy):
-        course, speed = Converter.xy_to_polar(0, 0, vx, vy)
+        course, speed = Converter.xy_to_polar(None, None, vx, vy)
         return speed, course
