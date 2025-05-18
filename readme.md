@@ -155,9 +155,9 @@ https://github.com/user-attachments/assets/5c258011-4a4a-449e-965a-329bc0af8dc3
 |               └── data.yaml
 |               └── eni.dat
 |       └── scripts/
-|           └── run_preparation.py_
-|           └── run_model.py_
-|           └── run_trials.py_
+|           └── run_preparation.py
+|           └── run_model.py
+|           └── run_trials.py
 └── README.md
 ```
 
