@@ -8,7 +8,19 @@ This repository provides tools and instructions to prepare, build, use, and eval
 
 https://github.com/user-attachments/assets/5c258011-4a4a-449e-965a-329bc0af8dc3
 
+---
 
+## Walkthrough
+
+1. 📦 Start with the [**Environment Preparation**](#environment-preparation) section.
+
+2. 📁 If you want to **download and build the VESSA dataset**, proceed to the next section: [**Building the VESSA Dataset**](#building-the-vessa-dataset).
+
+3. ⬇️ If you prefer to use the **ready-to-use VESSA dataset**, skip ahead to [**Downloading the Ready-to-Use Dataset**](#downloading-the-ready-to-use-dataset).
+
+4. 📊 To **reproduce the results** described in our paper, go to [**Reproducing Evaluation Results**](#reproducing-evaluation-results).
+
+5. 🎥 To **customize the model** or use it **as-is**, see [**Using the Model on Custom Videos or Live Streams**](#using-the-model-on-custom-videos-or-live-streams).
 
 
 ---
@@ -18,6 +30,7 @@ https://github.com/user-attachments/assets/5c258011-4a4a-449e-965a-329bc0af8dc3
 1. Install **Python 3.12** and allow the installer to automatically set the Python PATH.
 2. Update **NVIDIA® GPU drivers** to version **450.80.02 or higher** if you want GPU support.
 3. If you're using **Linux**, you can execute the `create-env` script using your system shell.
+
 
 ---
 
@@ -41,7 +54,7 @@ https://github.com/user-attachments/assets/5c258011-4a4a-449e-965a-329bc0af8dc3
    - **Storage:** Downloading the dataset may require **~1 TB**.
    - To save space, set the `_auto_resize_` parameter to `True` when calling the `download` function.
    - It is **recommended to set `_start_again_` to `False`** to avoid losing previously downloaded data.
-   - The automatic labeling process is slow and may have errors; however, **verified annotations by human experts** are provided. By default, labeling is **disabled**.
+   - The automatic labeling process is slow and may have errors; however, **verified annotations by human experts** are provided. By default, labeling is **disabled**. If you want the consolidated dataset, go to the next topic.
    - The manual labeling required the redistribution of the samples with `distribute.py` script.
 
 4. You can visualize all images and their bounding boxes (auxiliary tool, not UX-oriented).
@@ -59,7 +72,7 @@ https://github.com/user-attachments/assets/5c258011-4a4a-449e-965a-329bc0af8dc3
 
 1. Download the dataset as described above.
 2. Copy all folders from the second schema to the `evaluation/tmm` folder.
-3. Run the evaluation:
+3. Run the evaluation:Downloading the Ready-to-Use Dataset
    ```bash
    python run_trials.py
    ```
