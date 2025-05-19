@@ -12,15 +12,15 @@ https://github.com/user-attachments/assets/5c258011-4a4a-449e-965a-329bc0af8dc3
 
 ## Walkthrough
 
-1. 📦 Start with the [**Environment Preparation**](#environment-preparation) section.
+1. 🔧 Start with the **Environment Preparation** section.
 
-2. 📁 If you want to **download and build the VESSA dataset**, proceed to the next section: [**Building the VESSA Dataset**](#building-the-vessa-dataset).
+2. 🧱 If you want to **download and build the VESSA dataset**, proceed to the next section: **Building the VESSA Dataset**.
 
-3. ⬇️ If you prefer to use the **ready-to-use VESSA dataset**, skip ahead to [**Downloading the Ready-to-Use Dataset**](#downloading-the-ready-to-use-dataset).
+3. ⬇️ If you prefer to use the **ready-to-use VESSA dataset**, skip ahead to **Downloading the Ready-to-Use Dataset**.
 
-4. 📊 To **reproduce the results** described in our paper, go to [**Reproducing Evaluation Results**](#reproducing-evaluation-results).
+4. 📊 To **reproduce the results** described in our paper, go to **Reproducing Evaluation Results**.
 
-5. 🎥 To **customize the model** or use it **as-is**, see [**Using the Model on Custom Videos or Live Streams**](#using-the-model-on-custom-videos-or-live-streams).
+5. 📹 To **customize the model** or use it **as-is**, see **Using the Model on Custom Videos or Live Streams**.
 
 
 ---
@@ -34,7 +34,7 @@ https://github.com/user-attachments/assets/5c258011-4a4a-449e-965a-329bc0af8dc3
 
 ---
 
-## 🧱 If you want to build the VESSA Dataset from Scratch.. 
+## 🧱 Building the VESSA Dataset 
 
 1. Run the script:  
    ```bash
@@ -68,7 +68,7 @@ https://github.com/user-attachments/assets/5c258011-4a4a-449e-965a-329bc0af8dc3
 
 ---
 
-## 🧪 Reproducing Evaluation Results
+## 📊 Reproducing Evaluation Results
 
 1. Download the dataset as described above.
 2. Copy all folders from the second schema to the `evaluation/tmm` folder.
