@@ -178,4 +178,7 @@ https://github.com/user-attachments/assets/5c258011-4a4a-449e-965a-329bc0af8dc3
 
 ## 🧠 Citation
 
-If you use the VESSA Dataset or the model in academic work, please cite the original paper (to be added here).
+If you use the VESSA Dataset or the model in academic work, please cite us!
+
+VESSA Dataset: https://zenodo.org/badge/DOI/10.5281/zenodo.15459993.svg
+
