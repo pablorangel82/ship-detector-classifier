@@ -80,7 +80,7 @@ https://github.com/user-attachments/assets/5c258011-4a4a-449e-965a-329bc0af8dc3
 
 ## 📹 Using the Model on Custom Videos or Live Streams
 
-1. Ensure your `_config_` folder contains a JSON file with camera parameters.
+1. Ensure your `config` folder contains a JSON file with camera parameters.
 2. Specify this file in `run_model.py`.
 3. If you want to use translated category names or different dimensions, create a new file and place it in the the `categories` folder. Then, specify the correct filename in `run_model.py`, passing it to the DCM constructor.
 
