@@ -70,9 +70,8 @@ https://github.com/user-attachments/assets/5c258011-4a4a-449e-965a-329bc0af8dc3
 
 ## 📊 Reproducing Evaluation Results
 
-1. Download the dataset as described above.
-2. Copy all folders from the second schema to the `evaluation/tmm` folder.
-3. Run the evaluation:Downloading the Ready-to-Use Dataset
+1. Copy all folders from the second schema to the `evaluation/tmm` folder.
+2. Run the evaluation:
    ```bash
    python run_trials.py
    ```
