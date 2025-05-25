@@ -63,7 +63,7 @@ https://github.com/user-attachments/assets/5c258011-4a4a-449e-965a-329bc0af8dc3
 
 ## ⬇️ Downloading the Ready-to-Use Dataset
 
-- Visit the official [ZENODO page](https://zenodo.org/) and download the `.zip` file.
+- Visit the official https://doi.org/10.5281/zenodo.15459993 and download the `.zip` file.
 - Unzip the file into a local folder of your choice.
 
 ---
