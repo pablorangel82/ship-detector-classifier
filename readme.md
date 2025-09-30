@@ -2,6 +2,27 @@
 
 This repository provides tools and instructions to prepare, build, use, and evaluate the **VESSA Dataset** and associated models for vessel detection, classification, and tracking using monocular vision.
 
+
+
+
+
+https://github.com/user-attachments/assets/5c258011-4a4a-449e-965a-329bc0af8dc3
+
+---
+
+## Walkthrough
+
+1. 🔧 Start with the **Environment Preparation** section.
+
+2. 🧱 If you want to **download and build the VESSA dataset**, proceed to the next section: **Building the VESSA Dataset**.
+
+3. ⬇️ If you prefer to use the **ready-to-use VESSA dataset**, skip ahead to **Downloading the Ready-to-Use Dataset**.
+
+4. 📊 To **reproduce the results** described in our paper, go to **Reproducing Evaluation Results**.
+
+5. 📹 To **customize the model** or use it **as-is**, see **Using the Model on Custom Videos or Live Streams**.
+
+
 ---
 
 ## 🔧 Environment Preparation
@@ -10,9 +31,10 @@ This repository provides tools and instructions to prepare, build, use, and eval
 2. Update **NVIDIA® GPU drivers** to version **450.80.02 or higher** if you want GPU support.
 3. If you're using **Linux**, you can execute the `create-env` script using your system shell.
 
+
 ---
 
-## 🧱 If you want to build the VESSA Dataset from Scratch.. 
+## 🧱 Building the VESSA Dataset 
 
 1. Run the script:  
    ```bash
@@ -32,7 +54,7 @@ This repository provides tools and instructions to prepare, build, use, and eval
    - **Storage:** Downloading the dataset may require **~1 TB**.
    - To save space, set the `_auto_resize_` parameter to `True` when calling the `download` function.
    - It is **recommended to set `_start_again_` to `False`** to avoid losing previously downloaded data.
-   - The automatic labeling process is slow and may have errors; however, **verified annotations by human experts** are provided. By default, labeling is **disabled**.
+   - The automatic labeling process is slow and may have errors; however, **verified annotations by human experts** are provided. By default, labeling is **disabled**. If you want the consolidated dataset, go to the next topic.
    - The manual labeling required the redistribution of the samples with `distribute.py` script.
 
 4. You can visualize all images and their bounding boxes (auxiliary tool, not UX-oriented).
@@ -41,16 +63,15 @@ This repository provides tools and instructions to prepare, build, use, and eval
 
 ## ⬇️ Downloading the Ready-to-Use Dataset
 
-- Visit the official [ZENODO page](https://zenodo.org/) and download the `.zip` file.
+- Visit the official https://doi.org/10.5281/zenodo.15459993 and download the `.zip` file.
 - Unzip the file into a local folder of your choice.
 
 ---
 
-## 🧪 Reproducing Evaluation Results
+## 📊 Reproducing Evaluation Results
 
-1. Download the dataset as described above.
-2. Copy all folders from the second schema to the `evaluation/tmm` folder.
-3. Run the evaluation:
+1. Copy all folders from the second schema to the `evaluation/tmm` folder.
+2. Run the evaluation:
    ```bash
    python run_trials.py
    ```
@@ -59,11 +80,11 @@ This repository provides tools and instructions to prepare, build, use, and eval
 
 ## 📹 Using the Model on Custom Videos or Live Streams
 
-1. Ensure your `_config_` folder contains a JSON file with camera parameters.
+1. Ensure your `config` folder contains a JSON file with camera parameters.
 2. Specify this file in `run_model.py`.
 3. If you want to use translated category names or different dimensions, create a new file and place it in the the `categories` folder. Then, specify the correct filename in `run_model.py`, passing it to the DCM constructor.
 
-### JSON Example (`_setup.json_`)
+### JSON Example (`setup.json`)
 ```json
 {
   "camera": {
@@ -146,9 +167,9 @@ This repository provides tools and instructions to prepare, build, use, and eval
 |               └── data.yaml
 |               └── eni.dat
 |       └── scripts/
-|           └── run_preparation.py_
-|           └── run_model.py_
-|           └── run_trials.py_
+|           └── run_preparation.py
+|           └── run_model.py
+|           └── run_trials.py
 └── README.md
 ```
 
@@ -156,4 +177,8 @@ This repository provides tools and instructions to prepare, build, use, and eval
 
 ## 🧠 Citation
 
-If you use the VESSA Dataset or the model in academic work, please cite the original paper (to be added here).
+If you use the VESSA Dataset or the model in academic work, please cite us!
+
+VESSA Dataset: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15459993.svg)](https://doi.org/10.5281/zenodo.15459993)
+
+
