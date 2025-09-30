@@ -91,99 +91,92 @@ categories = {
         "min_air_draught": 10987.06,
         "avg_air_draught": 14367.70
     },
-    "Fire Fighting Vessels": {
-        "id": 13,
-        "name": "Fire Fighting Vessel",
-        "max_air_draught": 11731.62,
-        "min_air_draught": 7541.75,
-        "avg_air_draught": 9636.68
-    },
     "Patrol Vessels": {
-        "id": 14,
+        "id": 13,
         "name": "Patrol Vessel",
         "max_air_draught": 16348.15,
         "min_air_draught": 5590.48,
         "avg_air_draught": 7143.39
     },
     "Platforms": {
-        "id": 15,
+        "id": 14,
         "name": "Platform",
         "max_air_draught": 25394.92,
         "min_air_draught": 16325.30,
         "avg_air_draught": 20860.11
     },
     "Standby Safety Vessels": {
-        "id": 16,
+        "id": 15,
         "name": "Standby Safety Vessel",
         "max_air_draught": 11511.54,
         "min_air_draught": 7400.27,
         "avg_air_draught": 9455.91
     },
     "Combat Vessels": {
-        "id": 17,
+        "id": 16,
         "name": "Combat Vessel",
         "max_air_draught": 24000.00,
         "min_air_draught": 14857.14,
         "avg_air_draught": 19428.57
     },
     "Training Ships": {
-        "id": 18,
+        "id": 17,
         "name": "Training Ship",
         "max_air_draught": 21135.14,
         "min_air_draught": 9812.74,
         "avg_air_draught": 15473.94
     },
     "Icebreakers": {
-        "id": 19,
+        "id": 18,
         "name": "Icebreaker",
         "max_air_draught": 13852.77,
         "min_air_draught": 7459.18,
         "avg_air_draught": 10655.98
     },
     "Replenishment Vessels": {
-        "id": 20,
+        "id": 19,
         "name": "Replenishment Vessel",
         "max_air_draught": 20376.75,
         "min_air_draught": 13099.34,
         "avg_air_draught": 16738.05
     },
     "Tankers": {
-        "id": 21,
+        "id": 20,
         "name": "Tanker",
         "max_air_draught": 25317.07,
         "min_air_draught": 16275.26,
         "avg_air_draught": 41140.23
     },
     "Fishing Vessels": {
-        "id": 22,
+        "id": 21,
         "name": "Fishing Vessel",
         "max_air_draught": 17298.61,
         "min_air_draught": 8649.30,
         "avg_air_draught": 12973.96
     },
     "Supply Vessels": {
-        "id": 23,
+        "id": 22,
         "name": "Supply Vessel",
         "max_air_draught": 16267.89,
         "min_air_draught": 7886.50,
         "avg_air_draught": 10077.20
     },
     "Carrier Floating": {
-        "id": 24,
+        "id": 23,
         "name": "Carrier Floating",
         "max_air_draught": 41143.93,
         "min_air_draught": 25470.05,
         "avg_air_draught": 33306.99
     },
     "Dredgers": {
-        "id": 25,
+        "id": 24,
         "name": "Dredger",
         "max_air_draught": 8190.87,
         "min_air_draught": 5460.58,
         "avg_air_draught": 6825.72
     },
     "Unknown": {
-        "id": 26,
+        "id": 25,
         "name": "Unknown",
         "max_air_draught": 0,
         "min_air_draught": 0,

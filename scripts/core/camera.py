@@ -10,7 +10,6 @@ logging.basicConfig(level=logging.INFO, format='%(message)s', )
 class Camera:
 
     def __init__(self, site):
-        self.focused_track = None
         self.load_config(site)
         self.set_ptz(0,0,0)
         if self.address is not None:
@@ -48,33 +47,33 @@ class Camera:
         self.manual_offset_pan = 0
         self.manual_offset_tilt = 0
         self.manual_offset_zoom = 0
-        self.focused_track = None
         self.resolution_ratio = self.sensor_width_resolution / self.sensor_height_resolution
         self.timestamp = datetime.now()
         self.timestamp_ptz = datetime.now()
         self.current_frame_rate = self.frame_rate
         self.interval_measured = 0
-        
+
+        logging.info('\n### Sensor Data ###')
         if self.address is not None:
-            logging.info('Address: ' + self.address)
-        logging.info('Geo Position: ' + str(self.lat) + '  ' + str(self.lon))
-        logging.info('Reference elevation (degrees): ' + str(self.ref_elevation))
-        logging.info('Reference azimuth (degrees): ' + str(self.ref_azimuth))
-        logging.info('Initial Bearing (degrees): ' + str(self.bearing))
-        logging.info('Initial zoom (multiplier): ' + str(self.zoom_multiplier))
-        logging.info('Installation height (m): ' + str(self.installation_height))
-        logging.info('Surveillance Radius (m): ' + str(self.surveillance_radius))
-        logging.info('Focus Frame View (px): ' + str(self.focus_frame_view))
-        logging.info('Sensor Width (mm): ' + str(self.sensor_width_lens))
-        logging.info('Sensor Height (mm): ' + str(self.sensor_height_lens))
-        logging.info('Zoom Max (multiplier): ' + str(self.zoom_multiplier_max))
-        logging.info('Zoom Min (multiplier): ' + str(self.zoom_multiplier_min))
-        logging.info('Zoom Lens Max (mm): ' + str(self.zoom_lens_max))
-        logging.info('Zoom Lens Min (mm): ' + str(self.zoom_lens_min))
-        logging.info('HFOV Min (degrees): ' + str(self.hfov_max))
-        logging.info('HFOV Max (degrees): ' + str(self.hfov_min))
-        logging.info('Expected Frame Rate (FPS): ' + str(self.frame_rate))
-        logging.info('Sensor Resolution - Ratio: (' + str(self.sensor_width_resolution) + ',' + str(self.sensor_height_resolution) + ') - (' + str(self.resolution_ratio)+ ')') 
+            logging.info('* Address: ' + self.address)
+        logging.info('* Geo Position: ' + str(self.lat) + '  ' + str(self.lon))
+        logging.info('* Reference elevation (degrees): ' + str(self.ref_elevation))
+        logging.info('* Reference azimuth (degrees): ' + str(self.ref_azimuth))
+        logging.info('* Initial Bearing (degrees): ' + str(self.bearing))
+        logging.info('* Initial zoom (multiplier): ' + str(self.zoom_multiplier))
+        logging.info('* Installation height (m): ' + str(self.installation_height))
+        logging.info('* Surveillance Radius (m): ' + str(self.surveillance_radius))
+        logging.info('* Focus Frame View (px): ' + str(self.focus_frame_view))
+        logging.info('* Sensor Width (mm): ' + str(self.sensor_width_lens))
+        logging.info('* Sensor Height (mm): ' + str(self.sensor_height_lens))
+        logging.info('* Zoom Max (multiplier): ' + str(self.zoom_multiplier_max))
+        logging.info('* Zoom Min (multiplier): ' + str(self.zoom_multiplier_min))
+        logging.info('* Zoom Lens Max (mm): ' + str(self.zoom_lens_max))
+        logging.info('* Zoom Lens Min (mm): ' + str(self.zoom_lens_min))
+        logging.info('* HFOV Min (degrees): ' + str(self.hfov_max))
+        logging.info('* HFOV Max (degrees): ' + str(self.hfov_min))
+        logging.info('* Expected Frame Rate (FPS): ' + str(self.frame_rate))
+        logging.info('* Sensor Resolution - Ratio: (' + str(self.sensor_width_resolution) + ',' + str(self.sensor_height_resolution) + ') - (' + str(self.resolution_ratio)+ ')') 
        
     def next_frame(self):
         (ok, frame) = self.video_stream.stream.stream.read()

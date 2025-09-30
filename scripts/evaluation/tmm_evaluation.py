@@ -12,11 +12,11 @@ import codecs
 from core.category import Category
 import numpy as np
 from evaluation.metrics import Metric
-from core.estimation_submodule import Kinematic
+from core.estimation_submodule import LinearKinematic
 class TMMEvaluation:
     FPS = 15
     def __init__(self, category, test_case):
-        self.path = 'evaluation/trials/tmm/'+str(test_case)+'/'
+        self.path = '../report/evaluation/trials/tmm/'+str(test_case)+'/'
         self.category = category
         self.categories = Category.load_categories('en')
         self.trajectories = {}
@@ -47,7 +47,6 @@ class TMMEvaluation:
         dcm = DCM(self.path+'config','en')
         dcm.start()
         self.read_ground_truth(self.path)
-        logging.info ('Detection / Classification Task')
         self.current_frame = 0
         metric = Metric()
         while True:
@@ -58,7 +57,7 @@ class TMMEvaluation:
            # bearing, distance = Converter.geo_to_polar(dcm.camera.lat,dcm.camera.lon, gt.lat, gt.lng)
            # dcm.camera.set_to_track_position(bearing,distance)
             dcm.camera.convert_ptz_to_polar(gt.pan, gt.tilt, gt.zoom)
-            Kinematic.SIMULATED_DT = gt.delta_t
+            LinearKinematic.SIMULATED_DT = gt.delta_t
             
             img_to_show,tracks_list = dcm.detect_estimate_and_classify()
             if tracks_list is not None:
@@ -87,8 +86,8 @@ class TMMEvaluation:
             total_error_position = []
             total_error_speed = []
             total_error_course = []
-
-  
+            self.confusion_matrix = np.zeros((len(self.categories),len(self.categories)), dtype=np.int64) 
+            self.mcc_table  = np.zeros((len(self.categories),3), dtype=np.int64)
             percentile = 95
             total_duration = 0
             first_track = None
@@ -109,7 +108,6 @@ class TMMEvaluation:
                 #     continue
 
                 tracks_str += str(track.lat) + ',' +str(track.lon) + ',' + str(track.speed) + ',' + str(track.course) + '\n'
-                
                 self.confusion_matrix[self.category][track.classification.elected[0].id] += 1
                 self.mcc_table [self.category][0]+=1
                 self.mcc_table [track.classification.elected[0].id][1]+=1
@@ -150,13 +148,13 @@ class TMMEvaluation:
                    
                     metric.typical_classification_metrics(self.categories,self.confusion_matrix)
               
-                    rmse_window_error_position = metric.rmse(metric.values_bellow_percentile(window_error_position,percentile))
-                    rmse_window_error_speed = metric.rmse(metric.values_bellow_percentile(window_error_speed,percentile))
-                    rmse_window_error_course = metric.rmse(metric.values_bellow_percentile(window_error_course,percentile))
+                    rmse_window_error_position = metric.rmse(metric.values_below_percentile(window_error_position,percentile))
+                    rmse_window_error_speed = metric.rmse(metric.values_below_percentile(window_error_speed,percentile))
+                    rmse_window_error_course = metric.rmse(metric.values_below_percentile(window_error_course,percentile))
                     
-                    rmse_total_error_position = metric.rmse(metric.values_bellow_percentile(total_error_position,percentile))
-                    rmse_total_error_speed = metric.rmse(metric.values_bellow_percentile(total_error_speed,percentile))
-                    rmse_total_error_course = metric.rmse(metric.values_bellow_percentile(total_error_course,percentile))
+                    rmse_total_error_position = metric.rmse(metric.values_below_percentile(total_error_position,percentile))
+                    rmse_total_error_speed = metric.rmse(metric.values_below_percentile(total_error_speed,percentile))
+                    rmse_total_error_course = metric.rmse(metric.values_below_percentile(total_error_course,percentile))
 
                     window_error_course.clear()
                     window_error_speed.clear()
@@ -167,13 +165,20 @@ class TMMEvaluation:
                     results += str(total_duration) + ',' + str(rmse_total_error_position) + ',' + str(rmse_total_error_speed) + ',' + str(rmse_total_error_course) + ','
                     results += str(rmse_window_error_position) + ',' + str(rmse_window_error_speed) + ',' + str(rmse_window_error_course) + ','
                     results += str(metric.accs[self.category]) + '\n'#',' + str(metric.precs[self.category]) + ',' + str(metric.recalls[self.category]) + ',' +str(metric.f1s[self.category]) + '\n'
-                    print(metric.precs[self.category])
+                    # print(f'\nTotal_duration: {total_duration}')
+                    # print(f'\nTotal Error Position: {rmse_total_error_position}')
+                    # print(f'\nWindow Error Position: {rmse_window_error_position}')
+                    # print(f'\nTotal Error Speed: {rmse_total_error_speed}')
+                    # print(f'\nWindow Error Speed: {rmse_window_error_speed}')
+                    # print(f'\nTotal Error Course: {rmse_total_error_course}')
+                    # print(f'\nWindow Error Course: {rmse_window_error_course}')
+                    # print(f'\n Accuracy: {metric.precs[self.category]}')
+                    
             path_to_save = os.path.join(self.path,'tracks/',key +'.csv')   
             tfile = codecs.open(path_to_save, 'w', 'utf-8') 
           #  tfile.write(tracks_str)
             tfile.close()
-            #print(results)
             path_to_save = os.path.join(self.path,'results/',key+'_result.csv')        
             tFile = codecs.open(path_to_save, 'w', 'utf-8')
-           # tFile.write(results)
+            tFile.write(results)
             tFile.close()

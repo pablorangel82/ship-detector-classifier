@@ -23,10 +23,9 @@
     },
     "calibration" : {
         "threshold_intersection_detecting": 0.6,
-        "threshold_confidence" : 0.2,
-        "threshold_classification" : 0.1,
+        "threshold_confidence" : 0.0001,
         "threshold_intersection_tracking": 0.1,
         "train_img_width" : 640,
         "train_img_height" : 640
-    }      
+    }  
 }

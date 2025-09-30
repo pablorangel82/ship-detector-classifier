@@ -43,7 +43,7 @@ def save_results():
             reg = str(entry[0]) + ',' + str(entry[1]) + ',' + str(entry[2]) + ',' + str(entry[3]) + '\n'
             regs = regs + reg
 
-        tFile = codecs.open('../../report/statistics/statistics_'+ name +'.csv', 'w', 'utf-8')
+        tFile = codecs.open('../../report/statistics_'+ name +'.csv', 'w', 'utf-8')
         tFile.write(regs)
         tFile.close()
        
@@ -79,7 +79,7 @@ def save_results():
         logging.info('Average width: ' + str(avg_width) + ' - Coef Var: ' + str(coef_var_width) + ' - Number of Samples: ' + str(number_of_samples) + ' - Standard deviation: ' + str(mean_deviation_width))
         logging.info('Average summerdwt: ' + str(avg_summerdwt) + ' - Coef Var: ' + str(coef_var_summerdwt) + ' - Number of Samples: ' + str(number_of_samples) + ' - Standard deviation: ' + str(mean_deviation_summerdwt))
 
-    tFile = codecs.open('../../report/statistics/statistics.csv', 'w', 'utf-8')
+    tFile = codecs.open('../../report/statistics.csv', 'w', 'utf-8')
     tFile.write(lines)
     tFile.close()
     logging.info('Total samples: '+str(total_samples))
@@ -112,7 +112,7 @@ def extract_dimensions(category):
 def collect(_categories):
     global categories, root_path, vessels_data
     categories = _categories
-    root_path = DatasetConfig.DATASET_FOLDER
+    root_path = DatasetConfig.AUGMENTED_DATASET_FOLDER
     logging.info("Statistics calculations started at " + str(datetime.datetime.now()))
     threads = []
 

@@ -1,6 +1,6 @@
 import uuid
 import core.classification
-from core.estimation_submodule import Kinematic
+from core.estimation_submodule import LinearKinematic
 from core.monocular_vision_submodule import MonocularVision
 from core.converter import Converter
 import core.category
@@ -8,7 +8,7 @@ import numpy as np
 
 class Track:
     
-    def __init__(self, source):
+    def __init__(self,source):
         self.uuid = source + '-' + str(uuid.uuid4())
         self.classification = core.classification.Classification()
         self.name = None
@@ -23,10 +23,14 @@ class Track:
         self.bbox = None
         self.bbox_to_draw = None
         self.lost = False
-        self.bbox_xy = Kinematic (measurement_noise=1, process_noise=0.15, initial_gain=(1000, 1000, 1000, 1000))
-        self.bbox_wh = Kinematic (measurement_noise=1, process_noise=0.15, initial_gain=(1000, 1000, 1000, 1000))
-        self.utm = Kinematic (measurement_noise=1, process_noise=0.15,initial_gain=(200, 5000, 200, 5000))
-        self.vx_vy = Kinematic (measurement_noise=1, process_noise=0.0000013, initial_gain=(5000, 200, 5000, 200))
+        self.bbox_xy = LinearKinematic (measurement_noise=1, process_noise=0.15, initial_gain=(1000, 1000, 1000, 1000))
+        self.bbox_wh = LinearKinematic (measurement_noise=1, process_noise=0.15, initial_gain=(1000, 1000, 1000, 1000))
+        self.utm = LinearKinematic (measurement_noise=0.002, process_noise=0.0000013,initial_gain=(200, 5000, 200, 5000))
+        self.vx_vy = LinearKinematic (measurement_noise=0.5, process_noise=0.0000013, initial_gain=(5000, 200, 5000, 200))
+    
+    @staticmethod
+    def generate_uuid(source,id):
+        return source + '-' + str(id)
 
     def update(self, detected_bbox, camera, confidence, category_index):
         self.lost = False
@@ -45,23 +49,13 @@ class Track:
         air_draught = self.classification.elected[0].avg_air_draught
         x, y, lat, lon, bearing, distance_from_camera = MonocularVision.monocular_vision_detection_method_2(camera,air_draught, self.bbox)
         self.utm.update(x,y)
+        self.x = self.utm.position[0] 
+        self.y = self.utm.position[1] 
         self.vx_vy.update(x,y)
-        self.x=self.utm.position[0]
-        self.y=self.utm.position[1]
         self.bearing,self.distance_from_camera= Converter.xy_to_polar(camera.x,camera.y,self.x,self.y)
         self.lat,self.lon = Converter.xy_to_geo(self.x,self.y)
-
-        #self.utm.update(bearing,distance_from_camera)
-        # x=self.utm.position[0]
-        # y=self.utm.position[1]
-
-        # self.x = x + camera.x
-        # self.y = y + camera.y
-
-        #self.lat,self.lon = Converter.xy_to_geo(self.x,self.y)
-        #self.bearing,self.distance_from_camera= Converter.xy_to_polar(camera.x,camera.y,self.x,self.y)
         self.speed, self.course = Converter.calculate_speed_and_course(self.vx_vy.velocity[0], self.vx_vy.velocity[1])
-
+        
     def __str__(self):
         id = self.get_name()
         lat, lon, speed, course, bearing, distance, bbox = self.get_current_kinematic()

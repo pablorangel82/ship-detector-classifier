@@ -12,9 +12,9 @@ from core.calibration import Calibration
 from core.camera import Camera
 from core.tmm import Track
 from core.category import Category
+import logging
 
 class DCM(Thread):
-
     def __init__(self, config_path, language):
         Thread.__init__(self)
         self.tracks_list = {}
@@ -26,17 +26,24 @@ class DCM(Thread):
         self.calibration = Calibration(calibration_data)
         Category.load_categories(language)
         count = torch.cuda.device_count()
-        print('Number of GPUs: ' + str(count))
-        device = 'cpu'
+        logging.info('\n### Model Setup ###')
+        logging.info(f'* Config file: {config_path+'.json'}')
+        logging.info(f'* Number of GPUs: {str(count)}')
+        self.devices = 'cpu'
         if torch.cuda.is_available():
-            print('CUDA ENABLED')
-            device = 'cuda:0'
+            self.devices = []
+            for i in range (count):
+                self.devices.append(i)
+            logging.info(f'* CUDA ENABLED. Devices: {self.devices}')
+        else:
+            logging.info(f'* CUDA not enabled. You may experience reduced performance.')
         model_path = os.path.join('core/models/',"model.pt")
-        self.net_classifier = YOLO(model_path).to(device)
+        logging.info(f'* Model path: {str(model_path)}')
+        self.net_classifier = YOLO(model_path)
         self.net_classifier.conf = self.calibration.threshold_confidence
-        self.net_classifier.iou = self.calibration.threshold_intersection_detecting
+        self.net_classifier.iou = self.calibration.threshold_iou_detection
         self.net_classifier.mode = 'track'
-        self.net_classifier.agnostic = False  
+        self.net_classifier.agnostic = True  
         self.net_classifier.multi_label = False
         self.camera = Camera(camera_data)
 
@@ -53,8 +60,8 @@ class DCM(Thread):
         self.frame_height, self.frame_width, channels = raw_img.shape
         img_width = self.calibration.train_image_width
         img_height = self.calibration.train_image_height
-        img = cv2.resize(raw_img, (img_width, img_height), cv2.INTER_AREA)
-        detection_results = self.net_classifier.predict([img],verbose=False,conf=self.calibration.threshold_confidence, iou=self.calibration.threshold_intersection_detecting)
+        img = cv2.resize(raw_img, (img_width, img_height), cv2.INTER_LINEAR)
+        detection_results = self.net_classifier.predict([img],verbose=False,imgsz=img_width,device = self.devices,conf=self.calibration.threshold_confidence, iou=self.calibration.threshold_iou_detection)
         
         for result in detection_results:
             for box in result.boxes:
@@ -76,18 +83,18 @@ class DCM(Thread):
         with self.control_access_track_list:
             for track in self.tracks_list.values():
                 iou = track.calculate_iou(detected_bbox)
-                if iou >= self.calibration.threshold_intersection_tracking:
+                if iou >= self.calibration.threshold_iou_tracking:
                     if best_iou is None or iou > best_iou:
                         track_candidate = track
                         best_iou = iou
 
             if best_iou is None:
                 track_candidate = Track(self.camera.id)
-               
+            
             if confidence < self.calibration.threshold_classification:
                 confidence = 1
                 label = len(Category.CATEGORIES) - 1
-
+                logging.info(f'{confidence} < {self.calibration.threshold_classification}')
             track_candidate.update(detected_bbox,self.camera,confidence, int(label))
             self.tracks_list[track_candidate.uuid] = track_candidate
         return track_candidate

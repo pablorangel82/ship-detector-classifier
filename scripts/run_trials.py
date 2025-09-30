@@ -11,16 +11,17 @@ def compute_metrics_tmm(category, test_case):
 def compute_metrics_dcm():
     dcm_eval = DCMEvaluation()
     dcm_eval.evaluate()
-    
-logging.info("Evaluating DCM... ")
-#compute_metrics_dcm()
 
-logging.info("Evaluating TMM... ")
+if __name__ == "__main__":
+    logging.info("Evaluating DCM... ")
+    #compute_metrics_dcm()
 
-compute_metrics_tmm(2, '01')
-#compute_metrics_tmm(2, '02')
-#compute_metrics_tmm(21, '03')
-#compute_metrics_tmm(0, '04')
-#compute_metrics_tmm(5, '05')
-#compute_metrics_tmm(5, '06')
+    logging.info("Evaluating TMM... ")
+
+    #compute_metrics_tmm(2, '01')
+    #compute_metrics_tmm(2, '02')
+    #compute_metrics_tmm(20, '03')
+    #compute_metrics_tmm(0, '04')
+    #compute_metrics_tmm(5, '05')
+    compute_metrics_tmm(5, '06')
 
