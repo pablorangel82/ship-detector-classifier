@@ -47,7 +47,8 @@ class Track:
         self.classification.update(confidence, category_index)
      
         air_draught = self.classification.elected[0].avg_air_draught
-        x, y, lat, lon, bearing, distance_from_camera = MonocularVision.monocular_vision_detection_method_2(camera,air_draught, self.bbox)
+        #x, y, lat, lon, bearing, distance_from_camera = MonocularVision.monocular_vision_detection_method_2(camera,air_draught, self.bbox)
+        x, y, lat, lon, bearing, distance_from_camera = MonocularVision.monocular_vision_detection_method_3(camera, self.bbox)
         self.utm.update(x,y)
         self.x = self.utm.position[0] 
         self.y = self.utm.position[1] 
