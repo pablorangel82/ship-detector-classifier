@@ -34,7 +34,7 @@ class MonocularVision:
         diff_degrees = fator * (camera.hfov / 2)
         new_bearing = (camera.bearing + diff_degrees) % 360
         
-        new_distance = ((real_height * camera.focal_length_px) / pixel_height)
+        new_distance = ((real_height * camera.fx) / pixel_height)
         new_distance = (new_distance / 1000)  # mm to m
         
         new_position_x, new_position_y = Converter.polar_to_xy(camera.x, camera.y, new_bearing, new_distance)
