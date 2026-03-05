@@ -53,6 +53,10 @@ class Camera:
         self.current_frame_rate = self.frame_rate
         self.interval_measured = 0
 
+        # pixel size (constant)
+        self.pixel_size_x = self.sensor_width_lens / self.sensor_width_resolution
+        self.pixel_size_y = self.sensor_height_lens / self.sensor_height_resolution
+
         logging.info('\n### Sensor Data ###')
         if self.address is not None:
             logging.info('* Address: ' + self.address)
@@ -200,5 +204,13 @@ class Camera:
     
     def calculate_new_focal_length(self,zoom):
         self.focal_length_mm = self.zoom_lens_min + ((self.zoom_lens_max - self.zoom_lens_min) * zoom)
-        self.hfov = self.hfov_min + ((self.hfov_max - self.hfov_min) * (1-zoom))
-        self.focal_length_px = (self.focal_length_mm * self.sensor_height_resolution) / self.sensor_height_lens
+        
+        # linear approximations
+        #self.hfov = self.hfov_min + ((self.hfov_max - self.hfov_min) * (1-zoom))
+        #self.focal_length_px = (self.focal_length_mm * self.sensor_height_resolution) / self.sensor_height_lens
+        
+        # more accurate
+        self.hfov = math.degrees(2 * math.atan(self.sensor_width_lens / (2 * self.focal_length_mm)))
+        self.vfov = math.degrees(2 * math.atan(self.sensor_height_lens / (2 * self.focal_length_mm)))
+        self.fx = self.focal_length_mm / self.pixel_size_x
+        self.fy = self.focal_length_mm / self.pixel_size_y
