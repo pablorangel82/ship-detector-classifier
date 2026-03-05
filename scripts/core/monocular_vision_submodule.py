@@ -38,3 +38,26 @@ class MonocularVision:
         lat, lon = Converter.xy_to_geo(new_position_x,new_position_y)
         
         return new_position_x,new_position_y, lat, lon, new_bearing, new_distance
+
+    @staticmethod
+    def monocular_vision_detection_method_3(camera, detected_bbox):
+        # bearing estimation with arctan relations (more accurate)
+        pixel_width = detected_bbox[2]
+        x_center_pixel = detected_bbox[0] + (pixel_width / 2)
+        dx = x_center_pixel - camera.sensor_width_resolution / 2.0
+        angle_offset = math.degrees(math.atan(dx / camera.fx))
+        bearing = (camera.bearing + angle_offset) % 360
+
+        # distance estimation with tilt angle from camera (more accurate)
+        y_pixel = detected_bbox[1] + detected_bbox[3]
+        delta_px = y_pixel - camera.sensor_height_resolution / 2.0
+        delta_angle_rad = math.atan(delta_px / camera.fy)
+        alpha_rad = math.radians(camera.elevation) + delta_angle_rad
+        tan_alpha = math.tan(alpha_rad)
+        distance = camera.installation_height / tan_alpha
+        
+        # position estimation
+        x, y = Converter.polar_to_xy(camera.x, camera.y, bearing, distance)
+        lat, lon = Converter.xy_to_geo(x, y)
+        
+        return x, y, lat, lon, bearing, distance
