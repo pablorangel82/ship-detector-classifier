@@ -63,8 +63,8 @@ https://github.com/user-attachments/assets/5c258011-4a4a-449e-965a-329bc0af8dc3
 
 ## ⬇️ Downloading the Ready-to-Use Dataset
 
-- Visit the official https://doi.org/10.5281/zenodo.15459993 and download the `.zip` file.
-- Unzip the file into a local folder of your choice.
+- Visit the official https://doi.org/10.5281/zenodo.17246832 and download the `README.txt` file. Inside, you will find the link for download 27 files stored in google drive. 
+- Unzip the files into a local folder of your choice.
 
 ---
 
@@ -179,6 +179,6 @@ https://github.com/user-attachments/assets/5c258011-4a4a-449e-965a-329bc0af8dc3
 
 If you use the VESSA Dataset or the model in academic work, please cite us!
 
-VESSA Dataset: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15459993.svg)](https://doi.org/10.5281/zenodo.15459993)
+VESSA Dataset: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15459993.svg)](https://doi.org/10.5281/zenodo.17246832)
 
 
