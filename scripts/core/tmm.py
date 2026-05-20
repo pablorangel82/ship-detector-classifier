@@ -23,11 +23,10 @@ class Track:
         self.bbox = None
         self.bbox_to_draw = None
         self.lost = False
-        self.bbox_xy = LinearKinematic (measurement_noise=1, process_noise=0.15, initial_gain=(1000, 1000, 1000, 1000))
-        self.bbox_wh = LinearKinematic (measurement_noise=1, process_noise=0.15, initial_gain=(1000, 1000, 1000, 1000))
-        self.utm = LinearKinematic (measurement_noise=0.002, process_noise=0.0000013,initial_gain=(200, 5000, 200, 5000))
-        self.vx_vy = LinearKinematic (measurement_noise=0.5, process_noise=0.0000013, initial_gain=(5000, 200, 5000, 200))
-    
+        self.bbox_xy = LinearKinematic (measurement_noise=4, process_noise=2, initial_gain=(4, 4, 4, 4), innovation= 1.0, gating=False)
+        self.bbox_wh = LinearKinematic (measurement_noise=4, process_noise=2, initial_gain=(4, 4, 4, 4), innovation= 1.0, gating=False)
+        self.utm = LinearKinematic (measurement_noise=90000, process_noise=49,initial_gain=(90000, 200, 90000, 200), innovation= 1.02, gating= False)
+        
     @staticmethod
     def generate_uuid(source,id):
         return source + '-' + str(id)
@@ -39,6 +38,16 @@ class Track:
         w = detected_bbox[2]
         h = detected_bbox[3]
 
+        if self.bbox_wh.kf is not None:
+            if self.bbox_wh.position[0] > 0 and self.bbox_wh.position[1] > 0:   
+                if w > self.bbox_wh.position[0] * 1.4 or w < self.bbox_wh.position[0] * 0.6:
+                    return
+                if h > self.bbox_wh.position[1] * 1.2 or h < self.bbox_wh.position[1] * 0.8:
+                    return
+                # max_change = 0.02
+                # h = np.clip(h, self.bbox_wh.position[1]*(1-max_change), self.bbox_wh.position[1]*(1+max_change))
+                # w = np.clip(w, self.bbox_wh.position[0]*(1-max_change), self.bbox_wh.position[0]*(1+max_change))
+                
         self.bbox_xy.update(px, py)
         self.bbox_wh.update(w,h)
         self.bbox = [self.bbox_xy.position[0], self.bbox_xy.position[1], self.bbox_wh.position[0], self.bbox_wh.position[1]]
@@ -51,10 +60,9 @@ class Track:
         self.utm.update(x,y)
         self.x = self.utm.position[0] 
         self.y = self.utm.position[1] 
-        self.vx_vy.update(x,y)
         self.bearing,self.distance_from_camera= Converter.xy_to_polar(camera.x,camera.y,self.x,self.y)
         self.lat,self.lon = Converter.xy_to_geo(self.x,self.y)
-        self.speed, self.course = Converter.calculate_speed_and_course(self.vx_vy.velocity[0], self.vx_vy.velocity[1])
+        self.speed, self.course = Converter.calculate_speed_and_course(self.utm.velocity[0], self.utm.velocity[1])
         
     def __str__(self):
         id = self.get_name()

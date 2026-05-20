@@ -18,10 +18,13 @@ if __name__ == "__main__":
 
     logging.info("Evaluating TMM... ")
 
-    #compute_metrics_tmm(2, '01')
-    #compute_metrics_tmm(2, '02')
-    #compute_metrics_tmm(20, '03')
-    #compute_metrics_tmm(0, '04')
-    #compute_metrics_tmm(5, '05')
+    compute_metrics_tmm(2, '01')
+    compute_metrics_tmm(2, '02')
+    compute_metrics_tmm(20, '03')
+    compute_metrics_tmm(0, '04')
+    compute_metrics_tmm(5, '05')
     compute_metrics_tmm(5, '06')
+    path = '../report/evaluation/trials/tmm/'
+    TMMEvaluation.general_metrics(path)
+
 

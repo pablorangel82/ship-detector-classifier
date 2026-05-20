@@ -1,8 +1,13 @@
 import math
-import logging
-
+import numpy as np
 import math
 import logging
+import os
+import glob
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from scipy.stats import t
 
 class Metric:
     def __init__(self):
@@ -124,8 +129,8 @@ class Metric:
         return mcc
 
     def values_below_percentile(self, data, p):
-        if not data:
-            return []
+        if p == 100:
+            return data
         data_sorted = sorted(data)
         n = len(data_sorted)
         rank = p / 100 * (n - 1)
@@ -133,7 +138,16 @@ class Metric:
         upper = min(lower + 1, n - 1)
         weight = rank - lower
         threshold = data_sorted[lower] * (1 - weight) + data_sorted[upper] * weight
-        return [x for x in data if x < threshold]
+        return np.array([x for x in data if x <= threshold])
+
+    
+    def mae(self,list):
+        if list is None or len(list) == 0:
+            return 0
+        sum = 0
+        for value in list:
+            sum+=value
+        return sum/len(list)
 
     def rmse(self,list):
         if list is None or len(list) == 0:
@@ -141,7 +155,7 @@ class Metric:
         sum = 0
         for value in list:
             sum+=value
-        return sum/len(list)
+        return math.sqrt(sum/len(list))
 
     def med(self, data):
         if not data:
@@ -153,10 +167,20 @@ class Metric:
             med = (sorted_data[mid - 1] + sorted_data[mid]) / 2
         else:
             med = sorted_data[mid]
-        return math.sqrt(med)
+        return med
 
     def _sum(self, matrix, col):
         return sum(row[col] for row in matrix)
 
     def _sum_prod(self, matrix, col1, col2):
         return sum(row[col1] * row[col2] for row in matrix)
+
+    def std_sample(self, errors):
+        if errors is None or len(errors) < 2:
+            return 0.0
+
+        mean = sum(errors) / len(errors)
+        variance = sum((e - mean) ** 2 for e in errors) / (len(errors) - 1)
+        return math.sqrt(variance)
+
+ 

@@ -66,3 +66,21 @@ class Converter():
     def calculate_speed_and_course(vx, vy):
         course, speed = Converter.xy_to_polar(None, None, vx, vy)
         return speed, course
+
+    def polar_to_geometric(theta_polar_rad):
+        x_n = math.sin(theta_polar_rad)
+        y_n = math.cos(theta_polar_rad)
+        x_g = -x_n
+        y_g = y_n
+
+        return math.atan2(y_g, x_g)
+        
+    @staticmethod
+    def geometric_to_polar_degrees(theta_geom_rad):
+        theta_sensor = math.pi/2 - theta_geom_rad
+        theta_sensor = theta_sensor % (2*math.pi)
+        return math.degrees(theta_sensor)
+    
+    @staticmethod
+    def antihorario_para_horario_xy(x, y):
+        return x, -y

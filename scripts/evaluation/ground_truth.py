@@ -14,6 +14,9 @@ class GroundTruth:
         self.zoom = zoom
         self.timestamp = datetime.fromisoformat(timestamp)
         self.x,self.y = Converter.geo_to_xy(lat,lng)
+        if speed < 0.5:
+            self.speed = 0
+            self.course = 0
         self.vx,self.vy = Converter.polar_to_xy(None,None,course,speed)
 
     def __str__(self):
