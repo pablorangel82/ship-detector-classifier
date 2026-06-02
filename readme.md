@@ -8,11 +8,9 @@ This repository provides tools and instructions to prepare, build, use, and eval
 
 If you use the VESSA Dataset or the model in academic work, please cite us!
 
-VESSA Dataset: https://doi.org/10.5281/zenodo.17246832
+[1] P. Rangel et al., “Vessel Encyclopedia for Sea by Software Analysis (VESSA).” Zenodo, Nov. 15, 2025. doi: [10.5281/ZENODO.17246832](https://doi.org/10.5281/zenodo.17246832.
 
-Pablo Rangel, Matheus da Rocha Salazar, José Ricardo Potier de Oliveira, José Gomes de Carvalho, Claudio Miceli de Farias,
-A new approach for vessel detection, classification and estimation using monocular vision,
-Applied Ocean Research, Volume 172, 2026, 105096, ISSN 0141-1187, https://doi.org/10.1016/j.apor.2026.105096.
+[2] P. Rangel, M. da Rocha Salazar, J. R. P. de Oliveira, J. G. de Carvalho Júnior, and C. M. de Farias, “A new approach for vessel detection, classification and estimation using monocular vision,” Applied Ocean Research, vol. 172, p. 105096, Jul. 2026, doi: https://doi.org/10.1016/j.apor.2026.105096.
 
 https://github.com/user-attachments/assets/5c258011-4a4a-449e-965a-329bc0af8dc3
 
