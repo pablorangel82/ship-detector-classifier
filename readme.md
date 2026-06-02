@@ -2,10 +2,18 @@
 
 This repository provides tools and instructions to prepare, build, use, and evaluate the **VESSA Dataset** and associated models for vessel detection, classification, and tracking using monocular vision.
 
+---
 
+## 🧠 Citation
 
+If you use the VESSA Dataset or the model in academic work, please cite us!
 
+VESSA Dataset: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15459993.svg)](https://doi.org/10.5281/zenodo.17246832)
 
+Pablo Rangel, Matheus da Rocha Salazar, José Ricardo Potier de Oliveira, José Gomes de Carvalho, Claudio Miceli de Farias,
+A new approach for vessel detection, classification and estimation using monocular vision,
+Applied Ocean Research, Volume 172, 2026, 105096, ISSN 0141-1187, https://doi.org/10.1016/j.apor.2026.105096.
+[![DOI](https://doi.org/10.1016/j.apor.2026.105096)](https://doi.org/10.1016/j.apor.2026.105096)
 https://github.com/user-attachments/assets/5c258011-4a4a-449e-965a-329bc0af8dc3
 
 ---
@@ -173,13 +181,5 @@ https://github.com/user-attachments/assets/5c258011-4a4a-449e-965a-329bc0af8dc3
 └── README.md
 ```
 
----
 
-## 🧠 Citation
-
-If you use the VESSA Dataset or the model in academic work, please cite us!
-
-VESSA Dataset: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15459993.svg)](https://doi.org/10.5281/zenodo.17246832)
-
-Paper: Rangel, P. et al. A New Approach for Vessel Detection, Classification and Estimation Using Monocular Vision. Applied Ocean Research, 2026. [![DOI](https://doi.org/10.1016/j.apor.2026.105096)
 
