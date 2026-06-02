@@ -13,7 +13,7 @@ VESSA Dataset: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15459993.svg)
 Pablo Rangel, Matheus da Rocha Salazar, José Ricardo Potier de Oliveira, José Gomes de Carvalho, Claudio Miceli de Farias,
 A new approach for vessel detection, classification and estimation using monocular vision,
 Applied Ocean Research, Volume 172, 2026, 105096, ISSN 0141-1187, https://doi.org/10.1016/j.apor.2026.105096.
-[![DOI](https://doi.org/10.1016/j.apor.2026.105096)](https://doi.org/10.1016/j.apor.2026.105096)
+[![DOI](Open Access:)](https://doi.org/10.1016/j.apor.2026.105096)
 
 
 https://github.com/user-attachments/assets/5c258011-4a4a-449e-965a-329bc0af8dc3
