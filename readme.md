@@ -1,6 +1,6 @@
 # A New Approach for Vessel Detection, Classification and Estimation Using Monocular Vision
 
-This repository provides tools and instructions to prepare, build, use, and evaluate the **VESSA Dataset** and associated models for vessel detection, classification, and tracking using monocular vision.
+This repository provides tools and instructions to prepare, build, use, and evaluate the **VESSA Dataset** and associated **models for vessel detection, classification, and tracking using monocular vision**.
 
 ---
 
