@@ -181,5 +181,5 @@ If you use the VESSA Dataset or the model in academic work, please cite us!
 
 VESSA Dataset: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15459993.svg)](https://doi.org/10.5281/zenodo.17246832)
 
-Paper: Rangel, P. et al. A New Approach for Vessel Detection, Classification and Estimation Using Monocular Vision. Applied Ocean Research, 2026. [![DOI](https://doi.org/10.1016/j.apor.2026.105096])
+Paper: Rangel, P. et al. A New Approach for Vessel Detection, Classification and Estimation Using Monocular Vision. Applied Ocean Research, 2026. [![DOI](https://doi.org/10.1016/j.apor.2026.105096)
 
